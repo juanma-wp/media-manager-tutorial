@@ -5,17 +5,14 @@ import { store as coreDataStore } from "@wordpress/core-data";
 import apiFetch from "@wordpress/api-fetch";
 import { __ } from "@wordpress/i18n";
 
-// Import our shared field definitions and the edit modal
+// Import our shared field definitions and actions
 import { fields } from "./fields";
-import { getActions } from "./actions";
-
-import MediaEditModal from "./MediaEditModal";
+import { actions } from "./actions";
 
 // Configure apiFetch
 apiFetch.use(apiFetch.createNonceMiddleware(window.mediaManagerData?.nonce));
 
-const App = () => {
-  const [editingItem, setEditingItem] = useState(null);
+const ViewMediaList = () => {
   const [view, setView] = useState({
     type: "grid",
     perPage: 20,
@@ -78,15 +75,6 @@ const App = () => {
   };
 
 
-  // Handle save from edit modal
-  // The Redux store will automatically update when the entity is saved
-  const handleSaveEdit = (updatedItem) => {
-    // The media list will automatically refresh from the Redux store
-    // No need to manually update state
-  };
-
-  // Get actions with setEditingItem function
-  const actions = getActions(setEditingItem)
 
   return (
     <div>
@@ -115,15 +103,6 @@ const App = () => {
         paginationInfo={paginationInfo}
         getItemId={(item) => item.id}
       />
-
-      {/* Edit Modal */}
-      {editingItem && (
-        <MediaEditModal
-          media={editingItem}
-          onClose={() => setEditingItem(null)}
-          onSave={handleSaveEdit}
-        />
-      )}
     </div>
   );
 };
@@ -137,4 +116,4 @@ function formatFileSize(bytes) {
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
 }
 
-export default App;
+export default ViewMediaList;
