@@ -7,7 +7,7 @@ import { __ } from "@wordpress/i18n";
 
 // Import our shared field definitions and the edit modal
 import { fields } from "./fields";
-import { actions } from "./actions";
+import { getActions } from "./actions";
 
 import MediaEditModal from "./MediaEditModal";
 
@@ -84,6 +84,9 @@ const App = () => {
     // The media list will automatically refresh from the Redux store
     // No need to manually update state
   };
+
+  // Get actions with setEditingItem function
+  const actions = getActions(setEditingItem)
 
   return (
     <div>
