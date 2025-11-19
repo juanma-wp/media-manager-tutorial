@@ -1,87 +1,61 @@
-import { useMemo, useState } from "@wordpress/element";
+import { useState } from "@wordpress/element";
 import { DataForm } from "@wordpress/dataviews/wp";
 import { Button, Notice } from "@wordpress/components";
 import { __ } from "@wordpress/i18n";
-import { useSelect, useDispatch } from "@wordpress/data";
+import { useDispatch } from "@wordpress/data";
 import { store as coreDataStore } from "@wordpress/core-data";
-// Import the shared field definitions
 import { editableFields } from "./fields";
 
 const Edit = ({ item: media, closeModal }) => {
+  const [editMedia, setEditMedia] = useState(media);
+  const [isSaving, setIsSaving] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Get the edited entity record and related state from the store
-  const { editedMedia, isSaving, hasEdits, lastError } = useSelect(
-    (select) => ({
-      editedMedia: select(coreDataStore).getEditedEntityRecord(
-        "postType",
-        "attachment",
-        media.id
-      ),
-      lastError: select(coreDataStore).getLastEntitySaveError(
-        "postType",
-        "attachment",
-        media.id
-      ),
-      isSaving: select(coreDataStore).isSavingEntityRecord(
-        "postType",
-        "attachment",
-        media.id
-      ),
-      hasEdits: select(coreDataStore).hasEditsForEntityRecord(
-        "postType",
-        "attachment",
-        media.id
-      ),
-    }),
-    [media.id]
-  );
-
-  // Get dispatch actions
   const { editEntityRecord, saveEditedEntityRecord } = useDispatch(coreDataStore);
 
-  // Define form layout - use the actual field IDs from fields.js
   const form = {
     fields: ["title.raw", "alt_text", "caption.raw", "description.raw"],
   };
 
-  const [editMedia, setEditMedia] = useState(media);
-
-  // Handle changes using editEntityRecord
   const handleChange = (newData) => {
     setEditMedia({ ...editMedia, ...newData });
+    setError(null);
   };
 
-  // Handle save using saveEditedEntityRecord
   const handleSave = async () => {
+    setIsSaving(true);
     setSuccess(false);
+    setError(null);
 
-    editEntityRecord("postType", "attachment", media.id, editMedia);
-    
-    const updatedRecord = await saveEditedEntityRecord(
-      "postType",
-      "attachment",
-      media.id
-    );
+    try {
+      editEntityRecord("postType", "attachment", media.id, editMedia);
 
-    if (updatedRecord) {
-      setSuccess(true);
-      // Close modal after a brief success message
-      setTimeout(() => {
-        closeModal();
-      }, 1500);
+      const updatedRecord = await saveEditedEntityRecord(
+        "postType",
+        "attachment",
+        media.id
+      );
+
+      if (updatedRecord) {
+        setSuccess(true);
+        setTimeout(() => {
+          closeModal();
+        }, 1500);
+      }
+    } catch (err) {
+      setError(err.message || __("Failed to save changes"));
+    } finally {
+      setIsSaving(false);
     }
   };
+  const hasChanges = JSON.stringify(editMedia) !== JSON.stringify(media);
 
-  console.log("editMedia", editMedia);
   return (
     <div style={{ padding: "20px" }}>
-      {/* Display the media preview */}
       <div style={{ marginBottom: "20px", textAlign: "center" }}>
         <img
-          src={
-            media.media_details?.sizes?.medium?.source_url || media.source_url
-          }
+          src={media.media_details?.sizes?.medium?.source_url || media.source_url}
           alt={media.alt_text}
           style={{
             maxWidth: "100%",
@@ -92,21 +66,18 @@ const Edit = ({ item: media, closeModal }) => {
         />
       </div>
 
-      {/* Show any errors */}
-      {lastError && (
+      {error && (
         <Notice status="error" isDismissible={false}>
-          {lastError.message || __("Failed to save changes")}
+          {error}
         </Notice>
       )}
 
-      {/* Show success message */}
       {success && (
         <Notice status="success" isDismissible={false}>
           {__("Changes saved successfully!")}
         </Notice>
       )}
 
-      {/* The DataForm component */}
       <DataForm
         data={editMedia}
         fields={editableFields}
@@ -114,7 +85,6 @@ const Edit = ({ item: media, closeModal }) => {
         onChange={handleChange}
       />
 
-      {/* Action buttons */}
       <div
         style={{
           marginTop: "20px",
@@ -130,7 +100,7 @@ const Edit = ({ item: media, closeModal }) => {
           variant="primary"
           onClick={handleSave}
           isBusy={isSaving}
-          disabled={!hasEdits || isSaving}
+          disabled={!hasChanges || isSaving}
         >
           {isSaving ? __("Saving...") : __("Save Changes")}
         </Button>
