@@ -42,7 +42,7 @@ const Edit = ({ item: media, closeModal }) => {
 
   // Define form layout - use the actual field IDs from fields.js
   const form = {
-    fields: ["title.raw", "alt_text", "caption", "description.raw"],
+    fields: ["title.raw", "alt_text", "caption.raw", "description.raw"],
   };
 
   const [editMedia, setEditMedia] = useState(media);
@@ -73,6 +73,7 @@ const Edit = ({ item: media, closeModal }) => {
     }
   };
 
+  console.log("editMedia", editMedia);
   return (
     <div style={{ padding: "20px" }}>
       {/* Display the media preview */}

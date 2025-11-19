@@ -41,58 +41,20 @@ export const fields = [
 
     // DataViews: Enable search
     enableGlobalSearch: true,
-
-    // Common property: Extract value
-    getValue: ({ item }) => item.alt_text || "",
-
-    // DataViews: Visual indication when empty
-    render: ({ item }) => {
-      const altText = item.alt_text || "";
-      return (
-        <span
-          style={{
-            color: altText ? "inherit" : "#999",
-            fontStyle: altText ? "normal" : "italic",
-          }}
-        >
-          {altText || __("No alt text")}
-        </span>
-      );
-    },
-    // NEW: DataForm properties
-    setValue: ({ value }) => ({ alt_text: value }),
+  
     description: __(
       "Describe the purpose of the image. Leave empty if the image is purely decorative."
     ),
   },
   {
-    id: "caption",
+    id: "caption.raw",
     label: __("Caption"),
     type: "text",
-
-    getValue: ({ item }) => {
-      const caption = item.caption?.rendered || "";
-      // Strip HTML for search/sort operations
-      return caption.replace(/<[^>]*>/g, "");
-    },
-
-    // DataViews: Render HTML content safely
-    render: ({ item }) => {
-      const caption = item.caption?.rendered || "";
-      return caption ? (
-        <div dangerouslySetInnerHTML={{ __html: caption }} />
-      ) : (
-        <span style={{ color: "#999", fontStyle: "italic" }}>
-          {__("(empty)")}
-        </span>
-      );
-    },
 
     // DataViews: Allow hiding this column
     enableHiding: true,
     enableGlobalSearch: true,
 
-    setValue: ({ value }) => ({ caption: value }),
   },
   {
     id: "description.raw",
@@ -157,5 +119,5 @@ export function formatFileSize(bytes) {
 
 // Create a subset for editable fields
 export const editableFields = fields.filter( field =>
-    ['title.raw', 'alt_text', 'caption', 'description.raw'].includes( field.id )
+    ['title.raw', 'alt_text', 'caption.raw', 'description.raw'].includes( field.id )
 );
