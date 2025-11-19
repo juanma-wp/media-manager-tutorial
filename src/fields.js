@@ -157,5 +157,5 @@ export function formatFileSize(bytes) {
 
 // Create a subset for editable fields
 export const editableFields = fields.filter( field =>
-    ['title', 'alt_text', 'caption', 'description'].includes( field.id )
+    ['title.raw', 'alt_text', 'caption', 'description.raw'].includes( field.id )
 );
