@@ -5,7 +5,7 @@ import { dateI18n } from "@wordpress/date";
  * Media field definitions - Starting with DataViews properties
  * We'll enhance these with DataForm properties later
  */
-export const mediaFields = [
+export const fields = [
   {
     // Common property: Unique identifier
     id: "thumbnail",
@@ -13,24 +13,19 @@ export const mediaFields = [
     // Common property: Display label
     label: __("Thumbnail"),
 
+    getValue: ({ item }) => item.media_details.sizes.thumbnail.source_url,
     // DataViews: Disable sorting for image columns
     enableSorting: false,
-
-    // DataViews: Custom render for display
     render: ({ item }) => {
-      const thumbnailUrl =
-        item.media_details?.sizes?.thumbnail?.source_url || item.source_url;
-      return (
-        <img
-          src={thumbnailUrl}
-          alt={item.alt_text || ""}
-          className="media-thumbnail"
-        />
-      );
+      return <img src={item.source_url} alt={item.alt_text} />;
     },
+    type: "media",
+    description: __(
+      "The URL of the image. This is the image that will be displayed in the media library."
+    ),
   },
   {
-    id: "title",
+    id: "title.raw",
     label: __("Title"),
 
     // Common property: Field type (useful for both components)
@@ -38,22 +33,6 @@ export const mediaFields = [
 
     // DataViews: Enable search
     enableGlobalSearch: true,
-
-    // Common property: Extract value from data
-    getValue: ({ item }) => item.title?.rendered || "",
-
-    // DataViews: Custom display
-    render: ({ item }) => {
-      const title = item.title?.rendered || __("(no title)");
-      return (
-        <div>
-          <strong>{title}</strong>
-          <div className="media-filename">
-            {item.media_details?.file || item.source_url.split("/").pop()}
-          </div>
-        </div>
-      );
-    },
   },
   {
     id: "alt_text",
@@ -80,6 +59,11 @@ export const mediaFields = [
         </span>
       );
     },
+    // NEW: DataForm properties
+    setValue: ({ value }) => ({ alt_text: value }),
+    description: __(
+      "Describe the purpose of the image. Leave empty if the image is purely decorative."
+    ),
   },
   {
     id: "caption",
@@ -107,13 +91,20 @@ export const mediaFields = [
     // DataViews: Allow hiding this column
     enableHiding: true,
     enableGlobalSearch: true,
+
+    setValue: ({ value }) => ({ caption: value }),
+  },
+  {
+    id: "description.raw",
+    label: __("Description"),
+    type: "text",
+
+    enableHiding: true,
   },
   {
     id: "date",
     label: __("Date"),
     type: "datetime",
-
-    getValue: ({ item }) => item.date,
 
     // DataViews: Format date for display
     render: ({ item }) => dateI18n("M j, Y", item.date),
@@ -137,8 +128,6 @@ export const mediaFields = [
   {
     id: "mime_type",
     label: __("Type"),
-
-    getValue: ({ item }) => item.mime_type,
 
     // Elements for filtering
     elements: [
@@ -165,3 +154,8 @@ export function formatFileSize(bytes) {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
 }
+
+// Create a subset for editable fields
+export const editableFields = fields.filter( field =>
+    ['title', 'alt_text', 'caption', 'description'].includes( field.id )
+);

@@ -6,9 +6,10 @@
     "start": "wp-scripts start"
   },
   "devDependencies": {
-    "@wordpress/scripts": "^30.6.0"
+    "@wordpress/scripts": "^30.6.2"
   },
   "dependencies": {
-    "@wordpress/dataviews": "^4.9.0"
+    "@wordpress/dataviews": "next",
+    "@wordpress/icons": "^11.0.0"
   }
 }

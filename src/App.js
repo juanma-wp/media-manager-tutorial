@@ -1,100 +1,137 @@
-import { useState, useEffect, useMemo } from '@wordpress/element';
-import { DataViews, filterSortAndPaginate } from '@wordpress/dataviews/wp';
-import apiFetch from '@wordpress/api-fetch';
-import { __ } from '@wordpress/i18n';
-import { edit } from '@wordpress/icons';
-// Import our shared field definitions
-import { mediaFields } from './media-fields';
+import { useState, useEffect, useMemo } from "@wordpress/element";
+import { DataViews, filterSortAndPaginate } from "@wordpress/dataviews/wp";
+import { useSelect } from "@wordpress/data";
+import { store as coreDataStore } from "@wordpress/core-data";
+import apiFetch from "@wordpress/api-fetch";
+import { __ } from "@wordpress/i18n";
 
-// Configure apiFetch to use WordPress authentication
-apiFetch.use( apiFetch.createNonceMiddleware( window.mediaManagerData?.nonce ) );
+// Import our shared field definitions and the edit modal
+import { fields } from "./fields";
+import { actions } from "./actions";
+
+import MediaEditModal from "./MediaEditModal";
+
+// Configure apiFetch
+apiFetch.use(apiFetch.createNonceMiddleware(window.mediaManagerData?.nonce));
 
 const App = () => {
-    const [ media, setMedia ] = useState( [] );
-    const [ isLoading, setIsLoading ] = useState( true );
-    const [ view, setView ] = useState( {
-        type: 'table',
-        perPage: 20,
-        page: 1,
-        sort: {
-            field: 'date',
-            direction: 'desc'
-        },
-        search: '',
-        fields: [ 'thumbnail', 'title', 'alt_text', 'date', 'filesize' ]
-    } );
+  const [editingItem, setEditingItem] = useState(null);
+  const [view, setView] = useState({
+    type: "grid",
+    perPage: 20,
+    page: 1,
+    sort: {
+      field: "date",
+      direction: "desc",
+    },
+    titleField: "title.raw",
+    descriptionField: "description.raw",
+    mediaField: "thumbnail",
+    search: "",
+    fields: ["caption","filesize", "date","mime_type","alt_text"],
+  });
 
-    // Fetch media items on mount
-    useEffect( () => {
-        const fetchMedia = async () => {
-            try {
-                setIsLoading( true );
-                const items = await apiFetch( {
-                    path: '/wp/v2/media?per_page=100&_embed'
-                } );
-                setMedia( items );
-            } catch ( error ) {
-                console.error( 'Error fetching media:', error );
-            } finally {
-                setIsLoading( false );
-            }
-        };
+  // Get media from Redux store using useSelect
+  const { media, hasResolved } = useSelect(
+    (select) => {
+      const query = {
+        per_page: 100,
+        _embed: true,
+      };
 
-        fetchMedia();
-    }, [] );
+      // Add search if provided in view
+      if (view.search) {
+        query.search = view.search;
+      }
 
-    // Use our shared field definitions from media-fields.js
-    // Notice how we're using the same fields that DataForm will use
-    const fields = useMemo( () => mediaFields, [] );
+      const selectorArgs = ["postType", "attachment", query];
 
-    // Process data for pagination and filtering
-    const { data: processedData, paginationInfo } = useMemo( () => {
-        return filterSortAndPaginate( media, view, fields );
-    }, [ media, view, fields ] );
+      return {
+        media: select(coreDataStore).getEntityRecords(
+          "postType",
+          "attachment",
+          query
+        ) || [],
+        hasResolved: select(coreDataStore).hasFinishedResolution(
+          "getEntityRecords",
+          selectorArgs
+        ),
+      };
+    },
+    [view.search]
+  );
 
-    // Define available layouts
-    const defaultLayouts = {
-        table: {
-            layout: {
-                primaryField: 'title',
-            }
-        },
-        grid: {
-            layout: {
-                primaryField: 'title',
-                mediaField: 'thumbnail'
-            }
-        }
-    };
+  const isLoading = !hasResolved;
 
-    // Define actions (we'll add edit functionality later)
-    const actions = [
-        {
-            id: 'view',
-            label: __( 'View' ),
-            isPrimary: true,
-            icon: edit,
-            callback: ( [ item ] ) => {
-                window.open( item.link, '_blank' );
-            }
-        }
-    ];
+  // Process data for pagination and filtering
+  const { data: processedData, paginationInfo } = useMemo(() => {
+    return filterSortAndPaginate(media, view, fields);
+  }, [media, view, fields]);
 
-    return (
-        <div>
-            <h1>{ __( 'Media Manager' ) }</h1>
-            <DataViews
-                data={ processedData }
-                fields={ fields }
-                view={ view }
-                onChangeView={ setView }
-                defaultLayouts={ defaultLayouts }
-                actions={ actions }
-                isLoading={ isLoading }
-                paginationInfo={ paginationInfo }
-            />
+  
+  console.log({ processedData, fields, view });
+  // Define available layouts
+  const defaultLayouts = {
+    table: {},
+    grid: {},
+    list: {},
+  };
+
+
+  // Handle save from edit modal
+  // The Redux store will automatically update when the entity is saved
+  const handleSaveEdit = (updatedItem) => {
+    // The media list will automatically refresh from the Redux store
+    // No need to manually update state
+  };
+
+  return (
+    <div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "20px",
+        }}
+      >
+        <h1>{__("Media Manager")}</h1>
+        <div style={{ color: "#666" }}>
+          {media.length > 0 && <span>{__(`${media.length} items`)}</span>}
         </div>
-    );
+      </div>
+
+      <DataViews
+        data={processedData}
+        fields={fields}
+        view={view}
+        onChangeView={setView}
+        defaultLayouts={defaultLayouts}
+        actions={actions}
+        isLoading={isLoading}
+        paginationInfo={paginationInfo}
+        getItemId={(item) => item.id}
+      />
+
+      {/* Edit Modal */}
+      {editingItem && (
+        <MediaEditModal
+          media={editingItem}
+          onClose={() => setEditingItem(null)}
+          onSave={handleSaveEdit}
+        />
+      )}
+    </div>
+  );
 };
+
+// Helper function
+function formatFileSize(bytes) {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
+}
 
 export default App;
