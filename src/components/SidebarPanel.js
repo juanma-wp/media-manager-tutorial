@@ -1,8 +1,9 @@
 import { Button } from "@wordpress/components";
 import { close } from "@wordpress/icons";
 import { __ } from "@wordpress/i18n";
+import { DataForm } from "@wordpress/dataviews/wp";
 
-const SidebarPanel = ({ isOpen, onClose, title, children }) => {
+const SidebarPanel = ({ isOpen, onClose, title, children, selectedItem, fields, form, onChange }) => {
 	return (
 		<div className={`sidebar-panel ${isOpen ? "is-open" : ""}`}>
 			{/* Sidebar Header */}
@@ -19,7 +20,16 @@ const SidebarPanel = ({ isOpen, onClose, title, children }) => {
 
 			{/* Sidebar Content */}
 			<div className="sidebar-panel__content">
-				{children}
+				{selectedItem && fields && form ? (
+					<DataForm
+						data={selectedItem}
+						fields={fields}
+						form={form}
+						onChange={onChange}
+					/>
+				) : (
+					children
+				)}
 			</div>
 		</div>
 	);

@@ -9,6 +9,7 @@ import { drawerRight } from "@wordpress/icons";
 // Import our shared field definitions and actions
 import { fields } from "./fields";
 import { actions } from "./actions";
+import { form } from "./form";
 import SidebarPanel from "./components/SidebarPanel";
 
 // "defaultLayouts" definition
@@ -101,6 +102,27 @@ const ViewMediaList = () => {
     setIsSidebarOpen(true);
   };
 
+  // Handle selection change to select media and open sidebar
+  const handleSelectionChange = (selectedIds) => {
+    if (selectedIds && selectedIds.length > 0) {
+      // Find the selected item from the media array
+      const selectedItem = media.find(item => item.id === selectedIds[0]);
+      if (selectedItem) {
+        openSidebarWithMedia(selectedItem);
+      }
+    } else {
+      // No selection, close sidebar
+      closeSidebar();
+    }
+  };
+
+  // Handle form changes
+  const handleFormChange = (updatedItem) => {
+    setSelectedMedia(updatedItem);
+    // Here you would typically also update the media in the backend
+    // For now, we'll just update the local state
+  };
+
 
   return (
     <div className="media-manager-wrapper">
@@ -136,6 +158,7 @@ const ViewMediaList = () => {
           isLoading={isLoading}
           paginationInfo={paginationInfo}
           getItemId={(item) => item.id}
+          onChangeSelection={handleSelectionChange}
         />
       </div>
 
@@ -143,16 +166,14 @@ const ViewMediaList = () => {
       <SidebarPanel
         isOpen={isSidebarOpen}
         onClose={closeSidebar}
-        title={__("Media Details")}
+        title={selectedMedia ? (selectedMedia.title?.rendered || __("Untitled Media")) : __("Media Details")}
+        selectedItem={selectedMedia}
+        fields={fields}
+        form={form}
+        onChange={handleFormChange}
       >
-        {selectedMedia ? (
-          <div>
-            <h3>{selectedMedia.title?.rendered || __("Untitled")}</h3>
-            <p>{__("Selected media ID:")} {selectedMedia.id}</p>
-            {/* Add more media details here */}
-          </div>
-        ) : (
-          <p>{__("Click the toggle button to show/hide this sidebar panel.")}</p>
+        {!selectedMedia && (
+          <p>{__("Select a media item to view and edit its details.")}</p>
         )}
       </SidebarPanel>
     </div>
