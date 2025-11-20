@@ -88,25 +88,19 @@ const ViewMediaList = () => {
     setSelectedMedia(null);
   };
 
-  const openSidebarWithMedia = (item) => {
-    setSelectedMedia(item);
-    setIsSidebarOpen(true);
-  };
-
   // Handle selection change to select media and open sidebar
   const handleSelectionChange = (selectedIds) => {
     setSelection(selectedIds);
 
     if (selectedIds && selectedIds.length > 0) {
       // Find the selected item from the media array
-      const selectedItem = media.find(item => item.id === selectedIds[0]);
+      const selectedItem = media.find(item => item.id === parseInt(selectedIds[0]));
       if (selectedItem) {
-        openSidebarWithMedia(selectedItem);
+        setSelectedMedia(selectedItem);
       }
-    } else {
-      // No selection, close sidebar
-      closeSidebar();
-    }
+    } 
+
+    return false;
   };
 
   // Handle form changes
@@ -119,30 +113,10 @@ const ViewMediaList = () => {
   // Define actions for the picker
   const pickerActions = [
     {
-      callback: () => {
-        console.log('Cancel clicked');
-        setSelection([]);
-        closeSidebar();
-      },
-      id: 'cancel',
-      label: 'Cancel',
       supportsBulk: false,
-    },
-    {
-      callback: (items) => {
-        const selectedItems = Array.isArray(items) ? items : [items];
-        console.log('Confirm clicked:', selectedItems);
-        // Here you could save or perform actions with selected items
-      },
-      id: 'confirm',
-      isPrimary: true,
-      label: 'Confirm',
-      supportsBulk: false,
-    },
+    }
   ];
-
-  console.log(selection);
-  console.log(selectedMedia);
+  
   return (
     <div className="media-manager-wrapper">
       <div className="media-manager-container">

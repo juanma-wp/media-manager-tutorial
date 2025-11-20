@@ -1,10 +1,10 @@
 import { Button } from "@wordpress/components";
 import { close } from "@wordpress/icons";
 import { __ } from "@wordpress/i18n";
-import { DataForm } from "@wordpress/dataviews/wp";
+import EditMedia from "../EditMedia";
 
 const SidebarPanel = ({ isOpen, onClose, title, children, selectedItem, fields, form, onChange }) => {
-  console.log({isOpen, onClose, title, children, selectedItem, fields, form, onChange});
+  
 	return (
 		<div className={`sidebar-panel ${isOpen ? "is-open" : ""}`}>
 			{/* Sidebar Header */}
@@ -21,16 +21,7 @@ const SidebarPanel = ({ isOpen, onClose, title, children, selectedItem, fields, 
 
 			{/* Sidebar Content */}
 			<div className="sidebar-panel__content">
-				{selectedItem && fields && form ? (
-					<DataForm
-						data={selectedItem}
-						fields={fields}
-						form={form}
-						onChange={onChange}
-					/>
-				) : (
-					children
-				)}
+				{selectedItem && <EditMedia item={selectedItem} />}
 			</div>
 		</div>
 	);
