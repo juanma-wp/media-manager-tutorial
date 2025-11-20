@@ -2,8 +2,8 @@ import { __ } from "@wordpress/i18n";
 import { dateI18n } from "@wordpress/date";
 
 /**
- * Media field definitions - Starting with DataViews properties
- * We'll enhance these with DataForm properties later
+ * Media field definitions - Enhanced for both DataViews and DataForm
+ * Showcasing WordPress 6.9 field types and validation features
  */
 export const fields = [
   {
@@ -103,7 +103,7 @@ export const fields = [
     id: "filesize",
     label: __("File Size"),
     type: "integer",
-
+    readOnly: true,
     getValue: ({ item }) => item.media_details?.filesize || 0,
 
     // DataViews: Human-readable file size
@@ -120,7 +120,7 @@ export const fields = [
     id: "mime_type",
     label: __("Type"),
     type: "text",
-
+    readOnly: true,
     // Elements for filtering
     elements: [
       { value: "image/jpeg", label: "JPEG" },
@@ -149,6 +149,7 @@ export const fields = [
       const width = item.media_details?.width;
       return width ? `${width}px` : "-";
     },
+    readOnly: true,
     enableSorting: true,
     filterBy: {
       operators: ["is", "isNot", "isGreaterThan", "isLessThan"],
@@ -163,6 +164,7 @@ export const fields = [
       const height = item.media_details?.height;
       return height ? `${height}px` : "-";
     },
+    readOnly: true,
     enableSorting: true,
     filterBy: {
       operators: ["is", "isNot", "isGreaterThan", "isLessThan"],
@@ -179,7 +181,38 @@ export function formatFileSize(bytes) {
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
 }
 
-// Create a subset for editable fields
-export const editableFields = fields.filter( field =>
-    ['title.raw', 'alt_text', 'caption.raw', 'description.raw'].includes( field.id )
-);
+// Custom validation rules for media fields
+export const validateAltText = (value) => {
+  if (!value || value.trim() === '') {
+    return __('Alt text is required for accessibility');
+  }
+  if (value.length > 125) {
+    return __('Alt text should be less than 125 characters for optimal accessibility');
+  }
+  return true;
+};
+
+export const validateTitle = (value) => {
+  if (!value || value.trim() === '') {
+    return __('Title is required');
+  }
+  if (value.length < 3) {
+    return __('Title must be at least 3 characters long');
+  }
+  if (value.length > 100) {
+    return __('Title must be less than 100 characters');
+  }
+  // Check for special characters
+  const specialCharsRegex = /[<>]/;
+  if (specialCharsRegex.test(value)) {
+    return __('Title cannot contain < or > characters');
+  }
+  return true;
+};
+
+export const validateCaption = (value) => {
+  if (value && value.length > 200) {
+    return __('Caption should be less than 200 characters');
+  }
+  return true;
+};

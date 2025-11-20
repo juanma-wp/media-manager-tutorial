@@ -12,6 +12,7 @@ export const actions = [
     RenderModal: ({ items: [item], closeModal }) => {
       return <EditMedia item={item} closeModal={closeModal} />;
     },
+    modalSize: 'large'
   },
   {
     id: "download",

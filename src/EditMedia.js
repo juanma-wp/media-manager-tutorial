@@ -4,7 +4,8 @@ import { Button, Notice } from "@wordpress/components";
 import { __ } from "@wordpress/i18n";
 import { useDispatch } from "@wordpress/data";
 import { store as coreDataStore } from "@wordpress/core-data";
-import { editableFields } from "./fields";
+import { fields } from "./fields";
+import { form } from "./form";
 
 const Edit = ({ item: media, closeModal }) => {
   const [editMedia, setEditMedia] = useState(media);
@@ -13,10 +14,6 @@ const Edit = ({ item: media, closeModal }) => {
   const [error, setError] = useState(null);
 
   const { editEntityRecord, saveEditedEntityRecord } = useDispatch(coreDataStore);
-
-  const form = {
-    fields: ["title.raw", "alt_text", "caption.raw", "description.raw"],
-  };
 
   const handleChange = (newData) => {
     setEditMedia({ ...editMedia, ...newData });
@@ -80,7 +77,7 @@ const Edit = ({ item: media, closeModal }) => {
 
       <DataForm
         data={editMedia}
-        fields={editableFields}
+        fields={fields}
         form={form}
         onChange={handleChange}
       />
