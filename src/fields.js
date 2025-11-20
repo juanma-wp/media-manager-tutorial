@@ -9,10 +9,12 @@ export const fields = [
   {
     id: "id",
     label: __("ID"),
-    type: "text",
+    type: "integer",
     enableSorting: true,
     enableGlobalSearch: true,
-    filterBy: false,
+    filterBy: {
+      operators: ["is", "isNot"],
+    },
   },
   {
     // Common property: Unique identifier
@@ -41,6 +43,10 @@ export const fields = [
 
     // DataViews: Enable search
     enableGlobalSearch: true,
+    enableSorting: true,
+    filterBy: {
+      operators: ["contains", "notContains", "is", "isNot"],
+    },
   },
   {
     id: "alt_text",
@@ -49,6 +55,9 @@ export const fields = [
 
     // DataViews: Enable search
     enableGlobalSearch: true,
+    filterBy: {
+      operators: ["contains", "notContains", "is", "isNot"],
+    },
 
     description: __(
       "Describe the purpose of the image. Leave empty if the image is purely decorative."
@@ -62,6 +71,9 @@ export const fields = [
     // DataViews: Allow hiding this column
     enableHiding: true,
     enableGlobalSearch: true,
+    filterBy: {
+      operators: ["contains", "notContains"],
+    },
   },
   {
     id: "description.raw",
@@ -69,6 +81,9 @@ export const fields = [
     type: "text",
 
     enableHiding: true,
+    filterBy: {
+      operators: ["contains", "notContains"],
+    },
   },
   {
     id: "date",
@@ -80,6 +95,9 @@ export const fields = [
 
     // DataViews: Enable sorting
     enableSorting: true,
+    filterBy: {
+      operators: ["is", "isNot", "isBefore", "isAfter"],
+    },
   },
   {
     id: "filesize",
@@ -93,10 +111,15 @@ export const fields = [
       const size = item.media_details?.filesize || 0;
       return formatFileSize(size);
     },
+    enableSorting: true,
+    filterBy: {
+      operators: ["is", "isNot", "isGreaterThan", "isLessThan"],
+    },
   },
   {
     id: "mime_type",
     label: __("Type"),
+    type: "text",
 
     // Elements for filtering
     elements: [
@@ -104,13 +127,45 @@ export const fields = [
       { value: "image/png", label: "PNG" },
       { value: "image/gif", label: "GIF" },
       { value: "image/webp", label: "WebP" },
+      { value: "image/svg+xml", label: "SVG" },
+      { value: "video/mp4", label: "MP4 Video" },
       { value: "application/pdf", label: "PDF" },
+      { value: "application/zip", label: "ZIP" },
     ],
 
     // DataViews: Configure filtering
     filterBy: {
-      operators: ["is", "isNot"],
+      operators: ["is", "isNot", "isAny", "isNone"],
       isPrimary: true,
+    },
+    enableSorting: true,
+  },
+  {
+    id: "width",
+    label: __("Width"),
+    type: "integer",
+    getValue: ({ item }) => item.media_details?.width || 0,
+    render: ({ item }) => {
+      const width = item.media_details?.width;
+      return width ? `${width}px` : "-";
+    },
+    enableSorting: true,
+    filterBy: {
+      operators: ["is", "isNot", "isGreaterThan", "isLessThan"],
+    },
+  },
+  {
+    id: "height",
+    label: __("Height"),
+    type: "integer",
+    getValue: ({ item }) => item.media_details?.height || 0,
+    render: ({ item }) => {
+      const height = item.media_details?.height;
+      return height ? `${height}px` : "-";
+    },
+    enableSorting: true,
+    filterBy: {
+      operators: ["is", "isNot", "isGreaterThan", "isLessThan"],
     },
   },
 ];

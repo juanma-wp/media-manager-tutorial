@@ -10,7 +10,7 @@ import { actions } from "./actions";
 
 // "defaultLayouts" definition
 const primaryField = 'id';
-const mediaField = 'img_src';
+const mediaField = "thumbnail";
 
 const defaultLayouts = {
 	table: {
@@ -29,8 +29,9 @@ const defaultLayouts = {
 
 const ViewMediaList = () => {
   const [view, setView] = useState({
-    type: "grid",
+    type: "table",
     perPage: 20,
+    layout: defaultLayouts.table.layout,
     page: 1,
     sort: {
       field: "date",
@@ -40,10 +41,10 @@ const ViewMediaList = () => {
     descriptionField: "description.raw",
     mediaField: "thumbnail",
     search: "",
-    fields: ["id","caption","filesize", "date","mime_type","alt_text"],
+    fields: ["id", "caption", "filesize", "date", "mime_type", "alt_text"],
   });
 
-  // Get media from Redux store using useSelect
+  // Get media from Gutenberg stores using useSelect
   const { media, hasResolved } = useSelect(
     (select) => {
       const query = {
@@ -80,14 +81,6 @@ const ViewMediaList = () => {
     return filterSortAndPaginate(media, view, fields);
   }, [media, view, fields]);
 
-  
-  console.log({ processedData, fields, view });
-  // Define available layouts
-  const defaultLayouts = {
-    table: {},
-    grid: {},
-    list: {},
-  };
 
   return (
     <div>
