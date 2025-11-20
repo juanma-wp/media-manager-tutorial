@@ -4,6 +4,7 @@ import { __ } from "@wordpress/i18n";
 import { DataForm } from "@wordpress/dataviews/wp";
 
 const SidebarPanel = ({ isOpen, onClose, title, children, selectedItem, fields, form, onChange }) => {
+  console.log({isOpen, onClose, title, children, selectedItem, fields, form, onChange});
 	return (
 		<div className={`sidebar-panel ${isOpen ? "is-open" : ""}`}>
 			{/* Sidebar Header */}

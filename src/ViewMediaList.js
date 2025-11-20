@@ -1,53 +1,35 @@
-import { useState, useEffect, useMemo } from "@wordpress/element";
-import { DataViews, filterSortAndPaginate } from "@wordpress/dataviews/wp";
+import { useState, useMemo } from "@wordpress/element";
+import { DataViewsPicker, filterSortAndPaginate } from "@wordpress/dataviews/wp";
 import { useSelect } from "@wordpress/data";
 import { store as coreDataStore } from "@wordpress/core-data";
 import { __ } from "@wordpress/i18n";
 import { Button } from "@wordpress/components";
 import { drawerRight } from "@wordpress/icons";
 
-// Import our shared field definitions and actions
+// Import our shared field definitions and form
 import { fields } from "./fields";
-import { actions } from "./actions";
 import { form } from "./form";
 import SidebarPanel from "./components/SidebarPanel";
 
-// "defaultLayouts" definition
-const primaryField = 'id';
-const mediaField = "thumbnail";
-
-const defaultLayouts = {
-	table: {
-		layout: {
-			primaryField,
-		},
-	},
-	grid: {
-		layout: {
-			primaryField,
-			mediaField,
-		},
-	},
-};
 
 
 const ViewMediaList = () => {
   const [view, setView] = useState({
-    type: "table",
-    perPage: 20,
-    layout: defaultLayouts.table.layout,
+    fields: [],
+    filters: [],
+    groupByField: undefined,
+    infiniteScrollEnabled: undefined,
+    mediaField: "thumbnail",
     page: 1,
-    sort: {
-      field: "date",
-      direction: "desc",
-    },
+    perPage: 10,
+    search: "",
     titleField: "title.raw",
     descriptionField: "description.raw",
-    mediaField: "thumbnail",
-    search: "",
-    filters: [],
-    fields: ["id", "caption", "filesize", "date", "mime_type", "alt_text"],
+    type: "pickerGrid",
   });
+
+  // State for selection
+  const [selection, setSelection] = useState([]);
 
   // State for sidebar panel
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -82,8 +64,17 @@ const ViewMediaList = () => {
   const isLoading = !hasResolved;
 
   // All filtering, sorting, searching, and pagination handled client-side
-  // filterSortAndPaginate processes the view's filters, search, sort, and page settings
   const { data: processedData, paginationInfo } = useMemo(() => {
+    // Make sure we have valid data
+    if (!media || media.length === 0) {
+      return {
+        data: [],
+        paginationInfo: {
+          totalItems: 0,
+          totalPages: 0,
+        },
+      };
+    }
     return filterSortAndPaginate(media, view, fields);
   }, [media, view, fields]);
 
@@ -104,6 +95,8 @@ const ViewMediaList = () => {
 
   // Handle selection change to select media and open sidebar
   const handleSelectionChange = (selectedIds) => {
+    setSelection(selectedIds);
+
     if (selectedIds && selectedIds.length > 0) {
       // Find the selected item from the media array
       const selectedItem = media.find(item => item.id === selectedIds[0]);
@@ -123,7 +116,33 @@ const ViewMediaList = () => {
     // For now, we'll just update the local state
   };
 
+  // Define actions for the picker
+  const pickerActions = [
+    {
+      callback: () => {
+        console.log('Cancel clicked');
+        setSelection([]);
+        closeSidebar();
+      },
+      id: 'cancel',
+      label: 'Cancel',
+      supportsBulk: false,
+    },
+    {
+      callback: (items) => {
+        const selectedItems = Array.isArray(items) ? items : [items];
+        console.log('Confirm clicked:', selectedItems);
+        // Here you could save or perform actions with selected items
+      },
+      id: 'confirm',
+      isPrimary: true,
+      label: 'Confirm',
+      supportsBulk: false,
+    },
+  ];
 
+  console.log(selection);
+  console.log(selectedMedia);
   return (
     <div className="media-manager-wrapper">
       <div className="media-manager-container">
@@ -137,7 +156,11 @@ const ViewMediaList = () => {
         >
           <h1>{__("Media Manager")}</h1>
           <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            {media.length > 0 && <span style={{ color: "#666" }}>{__(`${media.length} items`)}</span>}
+            {media.length > 0 && (
+              <span style={{ color: "#666" }}>
+                {__(`${media.length} items`)}
+              </span>
+            )}
             <Button
               icon={drawerRight}
               onClick={toggleSidebar}
@@ -148,17 +171,24 @@ const ViewMediaList = () => {
           </div>
         </div>
 
-        <DataViews
+        <DataViewsPicker
+          actions={pickerActions}
+          config={{
+            perPageSizes: [10, 25, 50, 100],
+          }}
           data={processedData}
+          defaultLayouts={{
+            pickerGrid: {},
+          }}
           fields={fields}
-          view={view}
-          onChangeView={setView}
-          defaultLayouts={defaultLayouts}
-          actions={actions}
+          getItemId={(item) => item.id.toString()}
           isLoading={isLoading}
-          paginationInfo={paginationInfo}
-          getItemId={(item) => item.id}
+          itemListLabel="Media Items"
           onChangeSelection={handleSelectionChange}
+          onChangeView={setView}
+          paginationInfo={paginationInfo}
+          selection={selection}
+          view={view}
         />
       </div>
 
@@ -166,7 +196,11 @@ const ViewMediaList = () => {
       <SidebarPanel
         isOpen={isSidebarOpen}
         onClose={closeSidebar}
-        title={selectedMedia ? (selectedMedia.title?.rendered || __("Untitled Media")) : __("Media Details")}
+        title={
+          selectedMedia
+            ? selectedMedia.title?.rendered || __("Untitled Media")
+            : __("Media Details")
+        }
         selectedItem={selectedMedia}
         fields={fields}
         form={form}
