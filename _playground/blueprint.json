@@ -14,18 +14,6 @@
       "step": "installPlugin",
       "pluginData": {
         "resource": "git:directory",
-        "url": "https://github.com/wptrainingteam/dataviews-dataform-examples",
-        "ref": "HEAD",
-        "path": "/"
-      },
-      "options": {
-        "activate": true
-      }
-    },
-    {
-      "step": "installPlugin",
-      "pluginData": {
-        "resource": "git:directory",
         "url": "https://github.com/juanma-wp/media-manager-tutorial",
         "ref": "HEAD",
         "path": "/"
