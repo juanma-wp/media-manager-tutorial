@@ -41,29 +41,26 @@ const ViewMediaList = () => {
     descriptionField: "description.raw",
     mediaField: "thumbnail",
     search: "",
+    filters: [],
     fields: ["id", "caption", "filesize", "date", "mime_type", "alt_text"],
   });
 
-  // Get media from Gutenberg stores using useSelect
+  // Simple query to get all media - filtering/sorting handled client-side
+  const queryArgs = useMemo(() => ({
+    per_page: -1, // Get all items
+    _embed: true,
+  }), []);
+
+  // Get all media from WordPress stores
   const { media, hasResolved } = useSelect(
     (select) => {
-      const query = {
-        per_page: 100,
-        _embed: true,
-      };
-
-      // Add search if provided in view
-      if (view.search) {
-        query.search = view.search;
-      }
-
-      const selectorArgs = ["postType", "attachment", query];
+      const selectorArgs = ["postType", "attachment", queryArgs];
 
       return {
         media: select(coreDataStore).getEntityRecords(
           "postType",
           "attachment",
-          query
+          queryArgs
         ) || [],
         hasResolved: select(coreDataStore).hasFinishedResolution(
           "getEntityRecords",
@@ -71,12 +68,13 @@ const ViewMediaList = () => {
         ),
       };
     },
-    [view.search]
+    [queryArgs]
   );
 
   const isLoading = !hasResolved;
 
-  // Process data for pagination and filtering
+  // All filtering, sorting, searching, and pagination handled client-side
+  // filterSortAndPaginate processes the view's filters, search, sort, and page settings
   const { data: processedData, paginationInfo } = useMemo(() => {
     return filterSortAndPaginate(media, view, fields);
   }, [media, view, fields]);
