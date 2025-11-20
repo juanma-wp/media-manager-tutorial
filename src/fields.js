@@ -7,6 +7,14 @@ import { dateI18n } from "@wordpress/date";
  */
 export const fields = [
   {
+    id: "id",
+    label: __("ID"),
+    type: "text",
+    enableSorting: true,
+    enableGlobalSearch: true,
+    filterBy: false,
+  },
+  {
     // Common property: Unique identifier
     id: "thumbnail",
 
@@ -41,7 +49,7 @@ export const fields = [
 
     // DataViews: Enable search
     enableGlobalSearch: true,
-  
+
     description: __(
       "Describe the purpose of the image. Leave empty if the image is purely decorative."
     ),
@@ -54,7 +62,6 @@ export const fields = [
     // DataViews: Allow hiding this column
     enableHiding: true,
     enableGlobalSearch: true,
-
   },
   {
     id: "description.raw",

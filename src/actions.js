@@ -1,6 +1,6 @@
 import { __ } from "@wordpress/i18n";
 import { pencil, trash, download } from "@wordpress/icons";
-import Edit from "./EditMedia";
+import EditMedia from "./EditMedia";
 
 export const actions = [
   {
@@ -10,7 +10,7 @@ export const actions = [
     icon: pencil,
     modalHeader: __("Edit Media Details"),
     RenderModal: ({ items: [item], closeModal }) => {
-      return <Edit item={item} closeModal={closeModal} />;
+      return <EditMedia item={item} closeModal={closeModal} />;
     },
   },
   {
@@ -29,9 +29,10 @@ export const actions = [
   },
   {
     id: "view",
-    label: __("View attachment page"),
+    label: __("View attachment details"),
     callback: ([item]) => {
-      window.open(item.link, "_blank");
+      const link = `https://new-for-devs-wp-6-9.wp.local/wp-admin/upload.php?item=${item.id}`;
+      window.open(link, "_blank");
     },
   },
 ];

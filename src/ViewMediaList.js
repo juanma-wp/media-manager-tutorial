@@ -2,15 +2,30 @@ import { useState, useEffect, useMemo } from "@wordpress/element";
 import { DataViews, filterSortAndPaginate } from "@wordpress/dataviews/wp";
 import { useSelect } from "@wordpress/data";
 import { store as coreDataStore } from "@wordpress/core-data";
-import apiFetch from "@wordpress/api-fetch";
 import { __ } from "@wordpress/i18n";
 
 // Import our shared field definitions and actions
 import { fields } from "./fields";
 import { actions } from "./actions";
 
-// Configure apiFetch
-apiFetch.use(apiFetch.createNonceMiddleware(window.mediaManagerData?.nonce));
+// "defaultLayouts" definition
+const primaryField = 'id';
+const mediaField = 'img_src';
+
+const defaultLayouts = {
+	table: {
+		layout: {
+			primaryField,
+		},
+	},
+	grid: {
+		layout: {
+			primaryField,
+			mediaField,
+		},
+	},
+};
+
 
 const ViewMediaList = () => {
   const [view, setView] = useState({
@@ -25,7 +40,7 @@ const ViewMediaList = () => {
     descriptionField: "description.raw",
     mediaField: "thumbnail",
     search: "",
-    fields: ["caption","filesize", "date","mime_type","alt_text"],
+    fields: ["id","caption","filesize", "date","mime_type","alt_text"],
   });
 
   // Get media from Redux store using useSelect
@@ -73,8 +88,6 @@ const ViewMediaList = () => {
     grid: {},
     list: {},
   };
-
-
 
   return (
     <div>
