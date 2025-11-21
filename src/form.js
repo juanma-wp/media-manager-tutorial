@@ -3,14 +3,20 @@ export const form = {
 		type: 'panel',
 	},
 	fields: [
+  
 		'title.raw',
 		'alt_text',
 		'caption.raw',
 		'description.raw',
 		'date',
-		'filesize',
-		'mime_type',
-		'width',
-		'height',
+    {
+			id: 'fileInfo',
+			
+			layout: {
+				type: 'row',
+        alignment: 'center',
+			},
+			children: [ 'filesize', 'mime_type', 'width', 'height' ],
+		},
 	],
 };
