@@ -9,7 +9,8 @@ import { drawerRight } from "@wordpress/icons";
 // Import our shared field definitions and form
 import { fields } from "./fields";
 import { form } from "./form";
-import SidebarPanel from "./components/SidebarPanel";
+import { actions } from "./actions";
+import SidebarPanel from "./SidebarPanel";
 
 
 
@@ -110,13 +111,6 @@ const ViewMediaList = () => {
     // For now, we'll just update the local state
   };
 
-  // Define actions for the picker
-  const pickerActions = [
-    {
-      supportsBulk: false,
-    }
-  ];
-  
   return (
     <div className="media-manager-wrapper">
       <div className="media-manager-container">
@@ -146,7 +140,7 @@ const ViewMediaList = () => {
         </div>
 
         <DataViewsPicker
-          actions={pickerActions}
+          actions={actions}
           config={{
             perPageSizes: [10, 25, 50, 100],
           }}

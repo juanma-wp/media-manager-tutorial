@@ -1,7 +1,7 @@
 import { Button } from "@wordpress/components";
 import { close } from "@wordpress/icons";
 import { __ } from "@wordpress/i18n";
-import EditMedia from "../EditMedia";
+import EditMedia from "./EditMedia";
 
 const SidebarPanel = ({ isOpen, onClose, title, children, selectedItem, fields, form, onChange }) => {
   

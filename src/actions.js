@@ -1,19 +1,7 @@
 import { __ } from "@wordpress/i18n";
-import { pencil, trash, download } from "@wordpress/icons";
-import EditMedia from "./EditMedia";
+import { download } from "@wordpress/icons";
 
 export const actions = [
-  {
-    id: "edit",
-    label: __("Edit"),
-    isPrimary: true,
-    icon: pencil,
-    modalHeader: __("Edit Media Details"),
-    RenderModal: ({ items: [item], closeModal }) => {
-      return <EditMedia item={item} closeModal={closeModal} />;
-    },
-    modalSize: 'large'
-  },
   {
     id: "download",
     label: __("Download"),
@@ -26,7 +14,7 @@ export const actions = [
         link.click();
       });
     },
-    supportsBulk: true,
+    supportsBulk: false,
   },
   {
     id: "view",
