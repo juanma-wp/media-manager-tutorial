@@ -9,10 +9,7 @@ import { drawerRight } from "@wordpress/icons";
 // Import our shared field definitions and form
 import { fields } from "./fields";
 import { form } from "./form";
-import { actions } from "./actions";
 import SidebarPanel from "./SidebarPanel";
-
-
 
 const ViewMediaList = () => {
   const [view, setView] = useState({
@@ -111,6 +108,16 @@ const ViewMediaList = () => {
     // For now, we'll just update the local state
   };
 
+  // console.log("processedData", processedData);
+  // console.log("paginationInfo", paginationInfo);
+  // console.log("selection", selection);
+  // console.log("view", view);
+  // console.log("media", media);
+  // console.log("hasResolved", hasResolved);
+  // console.log("isLoading", isLoading);
+  // console.log("isSidebarOpen", isSidebarOpen);
+  // console.log("selectedMedia", selectedMedia);
+
   return (
     <div className="media-manager-layout">
       <div className="media-manager-main">
@@ -140,7 +147,9 @@ const ViewMediaList = () => {
         </div>
 
         <DataViewsPicker
-          actions={actions}
+          actions={[{
+            supportsBulk: false,
+          }]}
           config={{
             perPageSizes: [10, 25, 50, 100],
           }}

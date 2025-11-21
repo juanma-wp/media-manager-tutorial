@@ -4526,6 +4526,8 @@ body.lockscroll {
   :root {
     --wp-admin-border-width-focus: 1.5px;
   }
+}.dataviews-picker-wrapper {
+  height: inherit;
 }#media-manager-root {
   margin: 20px 0 20px 20px;
   background: #fff;

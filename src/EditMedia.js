@@ -1,4 +1,4 @@
-import { useState } from "@wordpress/element";
+import { useState, useEffect } from "@wordpress/element";
 import { DataForm } from "@wordpress/dataviews/wp";
 import { Button, Notice } from "@wordpress/components";
 import { __ } from "@wordpress/i18n";
@@ -8,12 +8,17 @@ import { fields } from "./fields";
 import { form } from "./form";
 
 const Edit = ({ item: media, closeModal }) => {
+  
   const [editMedia, setEditMedia] = useState(media);
   const [isSaving, setIsSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
 
   const { editEntityRecord, saveEditedEntityRecord } = useDispatch(coreDataStore);
+
+  useEffect(() => {
+    setEditMedia(media);
+  }, [media]);
 
   const handleChange = (newData) => {
     setEditMedia({ ...editMedia, ...newData });
