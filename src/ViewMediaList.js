@@ -154,9 +154,11 @@ const ViewMediaList = () => {
         </div>
 
         <DataViewsPicker
-          actions={[{
-            supportsBulk: false,
-          }]}
+          actions={[
+            {
+              supportsBulk: false,
+            },
+          ]}
           config={{
             perPageSizes: [10, 25, 50, 100],
           }}
@@ -183,7 +185,7 @@ const ViewMediaList = () => {
           onClose={closeSidebar}
           title={
             selectedMedia
-              ? selectedMedia.title?.rendered || __("Untitled Media")
+              ? `Edit Media Item with ID: ${selectedMedia.id}`
               : __("Select a Media Item to edit")
           }
           selectedItem={selectedMedia}
