@@ -136,7 +136,6 @@ export const fields = [
     // DataViews: Configure filtering
     filterBy: {
       operators: ["is", "isNot", "isAny", "isNone"],
-      isPrimary: true,
     },
     enableSorting: true,
   },
