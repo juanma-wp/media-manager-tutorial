@@ -53,6 +53,10 @@ const Edit = ({ item: media, closeModal }) => {
   };
   const hasChanges = JSON.stringify(editMedia) !== JSON.stringify(media);
 
+  console.log("media", media);
+  console.log("editMedia", editMedia);
+  console.log("hasChanges", hasChanges);
+
   return (
     <div style={{ padding: "20px" }}>
       <div style={{ marginBottom: "20px", textAlign: "center" }}>
@@ -95,9 +99,6 @@ const Edit = ({ item: media, closeModal }) => {
           gap: "10px",
         }}
       >
-        <Button variant="tertiary" onClick={closeModal} disabled={isSaving}>
-          {__("Cancel")}
-        </Button>
         <Button
           variant="primary"
           onClick={handleSave}

@@ -24,6 +24,9 @@ const ViewMediaList = () => {
     titleField: "title.raw",
     descriptionField: "description.raw",
     type: "pickerGrid",
+    layout: {
+      previewSize: 120
+    },
   });
 
   // State for selection
@@ -92,11 +95,15 @@ const ViewMediaList = () => {
 
     if (selectedIds && selectedIds.length > 0) {
       // Find the selected item from the media array
-      const selectedItem = media.find(item => item.id === parseInt(selectedIds[0]));
+      const selectedItem = media.find(
+        (item) => item.id === parseInt(selectedIds[0])
+      );
       if (selectedItem) {
         setSelectedMedia(selectedItem);
       }
-    } 
+    } else {
+      setSelectedMedia(null);
+    }
 
     return false;
   };
@@ -116,7 +123,7 @@ const ViewMediaList = () => {
   // console.log("hasResolved", hasResolved);
   // console.log("isLoading", isLoading);
   // console.log("isSidebarOpen", isSidebarOpen);
-  // console.log("selectedMedia", selectedMedia);
+  console.log("selectedMedia", selectedMedia);
 
   return (
     <div className="media-manager-layout">
@@ -177,7 +184,7 @@ const ViewMediaList = () => {
           title={
             selectedMedia
               ? selectedMedia.title?.rendered || __("Untitled Media")
-              : __("Select a page to edit")
+              : __("Select a Media Item to edit")
           }
           selectedItem={selectedMedia}
           fields={fields}
@@ -186,7 +193,7 @@ const ViewMediaList = () => {
         >
           {!selectedMedia && (
             <p style={{ padding: "20px", color: "#666" }}>
-              {__("Select a page to edit")}
+              {__("Select a Media Item to edit")}
             </p>
           )}
         </SidebarPanel>
