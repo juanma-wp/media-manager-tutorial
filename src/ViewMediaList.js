@@ -4,7 +4,7 @@ import { useSelect } from "@wordpress/data";
 import { store as coreDataStore } from "@wordpress/core-data";
 import { __ } from "@wordpress/i18n";
 import { Button } from "@wordpress/components";
-import { drawerRight } from "@wordpress/icons";
+import { pencil } from "@wordpress/icons";
 
 // Import our shared field definitions and form
 import { fields } from "./fields";
@@ -143,12 +143,14 @@ const ViewMediaList = () => {
               </span>
             )}
             <Button
-              icon={drawerRight}
+              icon={pencil}
               onClick={toggleSidebar}
-              variant="secondary"
+              variant="primary"
               label={isSidebarOpen ? __("Close sidebar") : __("Open sidebar")}
               isPressed={isSidebarOpen}
-            />
+            >
+              Edit
+            </Button>
           </div>
         </div>
 
