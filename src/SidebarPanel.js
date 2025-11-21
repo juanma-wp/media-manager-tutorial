@@ -3,10 +3,10 @@ import { close } from "@wordpress/icons";
 import { __ } from "@wordpress/i18n";
 import EditMedia from "./EditMedia";
 
-const SidebarPanel = ({ isOpen, onClose, title, children, selectedItem, fields, form, onChange }) => {
-  
+const SidebarPanel = ({ onClose, title, children, selectedItem, fields, form, onChange }) => {
+
 	return (
-		<div className={`sidebar-panel ${isOpen ? "is-open" : ""}`}>
+		<div className="sidebar-panel">
 			{/* Sidebar Header */}
 			<div className="sidebar-panel__header">
 				<h2 className="sidebar-panel__title">{title || __("Details")}</h2>

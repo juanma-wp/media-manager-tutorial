@@ -112,8 +112,8 @@ const ViewMediaList = () => {
   };
 
   return (
-    <div className="media-manager-wrapper">
-      <div className="media-manager-container">
+    <div className="media-manager-layout">
+      <div className="media-manager-main">
         <div
           style={{
             display: "flex",
@@ -161,23 +161,27 @@ const ViewMediaList = () => {
       </div>
 
       {/* Sidebar Panel */}
-      <SidebarPanel
-        isOpen={isSidebarOpen}
-        onClose={closeSidebar}
-        title={
-          selectedMedia
-            ? selectedMedia.title?.rendered || __("Untitled Media")
-            : __("Media Details")
-        }
-        selectedItem={selectedMedia}
-        fields={fields}
-        form={form}
-        onChange={handleFormChange}
-      >
-        {!selectedMedia && (
-          <p>{__("Select a media item to view and edit its details.")}</p>
-        )}
-      </SidebarPanel>
+      {isSidebarOpen && (
+        <SidebarPanel
+          isOpen={isSidebarOpen}
+          onClose={closeSidebar}
+          title={
+            selectedMedia
+              ? selectedMedia.title?.rendered || __("Untitled Media")
+              : __("Select a page to edit")
+          }
+          selectedItem={selectedMedia}
+          fields={fields}
+          form={form}
+          onChange={handleFormChange}
+        >
+          {!selectedMedia && (
+            <p style={{ padding: "20px", color: "#666" }}>
+              {__("Select a page to edit")}
+            </p>
+          )}
+        </SidebarPanel>
+      )}
     </div>
   );
 };
