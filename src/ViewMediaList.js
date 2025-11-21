@@ -86,7 +86,6 @@ const ViewMediaList = () => {
 
   const closeSidebar = () => {
     setIsSidebarOpen(false);
-    setSelectedMedia(null);
   };
 
   // Handle selection change to select media and open sidebar

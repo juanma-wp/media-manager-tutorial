@@ -74,7 +74,7 @@ media-manager-tutorial/
 │   ├── index.js           # Main entry point
 │   ├── ViewMediaList.js   # Main media list component with DataViews
 │   ├── EditMedia.js       # Inline media editing component
-│   ├── MediaEditModal.js  # Modal editing interface
+│   ├── SidebarPanel.js    # SideBar Panel
 │   ├── fields.js          # Field definitions for DataViews/DataForm
 │   ├── actions.js         # Action definitions for media items
 │   └── style.scss         # Component styles

@@ -8,7 +8,7 @@ import { fields } from "./fields";
 import { form } from "./form";
 
 const Edit = ({ item: media, closeModal }) => {
-  
+
   const [editMedia, setEditMedia] = useState(media);
   const [isSaving, setIsSaving] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -16,6 +16,7 @@ const Edit = ({ item: media, closeModal }) => {
 
   const { editEntityRecord, saveEditedEntityRecord } = useDispatch(coreDataStore);
 
+  // Reset editMedia when media prop changes
   useEffect(() => {
     setEditMedia(media);
   }, [media]);
