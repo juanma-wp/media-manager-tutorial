@@ -1,10 +1,11 @@
 import { useState, useMemo } from "@wordpress/element";
 import { DataViewsPicker, filterSortAndPaginate } from "@wordpress/dataviews/wp";
-import { useSelect } from "@wordpress/data";
-import { store as coreDataStore } from "@wordpress/core-data";
 import { __ } from "@wordpress/i18n";
 import { Button } from "@wordpress/components";
 import { pencil } from "@wordpress/icons";
+
+// Import our custom hook
+import { useMediaData } from "./hooks/useMediaData";
 
 // Import our shared field definitions and form
 import { fields } from "./fields";
@@ -36,33 +37,11 @@ const ViewMediaList = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState(null);
 
-  // Simple query to get all media - filtering/sorting handled client-side
-  const queryArgs = useMemo(() => ({
-    per_page: -1, // Get all items
-    _embed: true,
-  }), []);
-
-  // Get all media from WordPress stores
-  const { media, hasResolved } = useSelect(
-    (select) => {
-      const selectorArgs = ["postType", "attachment", queryArgs];
-
-      return {
-        media: select(coreDataStore).getEntityRecords(
-          "postType",
-          "attachment",
-          queryArgs
-        ) || [],
-        hasResolved: select(coreDataStore).hasFinishedResolution(
-          "getEntityRecords",
-          selectorArgs
-        ),
-      };
-    },
-    [queryArgs]
-  );
-
-  const isLoading = !hasResolved;
+  // Use our custom hook to fetch media data
+  const { media, isLoading, hasResolved } = useMediaData({
+    perPage: -1, // Get all items
+    embed: true,
+  });
 
   // All filtering, sorting, searching, and pagination handled client-side
   const { data: processedData, paginationInfo } = useMemo(() => {

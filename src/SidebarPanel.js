@@ -1,59 +1,29 @@
-import { useState } from "@wordpress/element";
 import { DataForm } from "@wordpress/dataviews/wp";
 import { Button, Notice } from "@wordpress/components";
 import { close } from "@wordpress/icons";
 import { __ } from "@wordpress/i18n";
-import { useDispatch } from "@wordpress/data";
-import { store as coreDataStore } from "@wordpress/core-data";
 import { fields } from "./fields";
 import { form } from "./form";
+import { useMediaEditor } from "./hooks/useMediaEditor";
 
 const SidebarPanel = ({ isOpen, onClose, selectedItem, onChange }) => {
-  const [changes, setChanges] = useState({});
-  const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState(null);
+  const {
+    displayItem,
+    isSaving,
+    message,
+    hasLocalChanges,
+    handleChange: handleEditorChange,
+    saveChanges,
+  } = useMediaEditor(selectedItem);
 
-  const { editEntityRecord, saveEditedEntityRecord } = useDispatch(coreDataStore);
-
-  // Combine original item with changes for display
-  const editedItem = selectedItem ? { ...selectedItem, ...changes } : null;
-
+  // Wrapper to call both the hook's handler and the parent's onChange
   const handleChange = (newData) => {
-    // Track only the changes
-    const updatedItem = { ...selectedItem, ...newData };
-    setChanges(updatedItem);
-    onChange(updatedItem);
-  };
-
-  const handleSave = async () => {
-    if (!selectedItem || Object.keys(changes).length === 0) return;
-
-    setIsSaving(true);
-    setMessage(null);
-
-    try {
-      // Update the entity record with changes
-      editEntityRecord("postType", "attachment", selectedItem.id, changes);
-
-      // Save the changes
-      const updatedRecord = await saveEditedEntityRecord(
-        "postType",
-        "attachment",
-        selectedItem.id
-      );
-
-      if (updatedRecord) {
-        setMessage({ type: 'success', text: __("Changes saved successfully!") });
-        setChanges({}); // Clear changes after successful save
-      }
-    } catch (error) {
-      setMessage({ type: 'error', text: __("Failed to save changes") });
-    } finally {
-      setIsSaving(false);
+    handleEditorChange(newData);
+    if (onChange) {
+      const updatedItem = { ...selectedItem, ...newData };
+      onChange(updatedItem);
     }
   };
-
-  const hasChanges = Object.keys(changes).length > 0;
 
   if (!isOpen) return null;
 
@@ -76,15 +46,6 @@ const SidebarPanel = ({ isOpen, onClose, selectedItem, onChange }) => {
           <p>{__("Select a media item from the grid to edit its details.")}</p>
         ) : (
           <>
-            {/* Preview Image */}
-            {/*
-            <div className="sidebar-panel__preview">
-              <img
-                src={selectedItem.source_url}
-                alt={selectedItem.alt_text}
-              />
-            </div>
-               */}
 
             {/* Messages */}
             {message && (
@@ -99,7 +60,7 @@ const SidebarPanel = ({ isOpen, onClose, selectedItem, onChange }) => {
 
             {/* Edit Form */}
             <DataForm
-              data={editedItem}
+              data={displayItem}
               fields={fields}
               form={form}
               onChange={handleChange}
@@ -115,9 +76,9 @@ const SidebarPanel = ({ isOpen, onClose, selectedItem, onChange }) => {
               </Button>
               <Button
                 variant="primary"
-                onClick={handleSave}
+                onClick={saveChanges}
                 isBusy={isSaving}
-                disabled={!hasChanges || isSaving}
+                disabled={!hasLocalChanges || isSaving}
               >
                 {isSaving ? __("Saving...") : __("Save Changes")}
               </Button>
