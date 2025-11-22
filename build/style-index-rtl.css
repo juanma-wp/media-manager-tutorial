@@ -4526,6 +4526,8 @@ body.lockscroll {
   :root {
     --wp-admin-border-width-focus: 1.5px;
   }
+}#media-manager-root button:has(img) {
+  height: inherit;
 }#media-manager-root .dataviews-picker-wrapper {
   height: inherit;
 }#media-manager-root .dataforms-layouts-row__field {

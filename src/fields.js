@@ -23,16 +23,24 @@ export const fields = [
     // Common property: Display label
     label: __("Thumbnail"),
 
-    getValue: ({ item }) => item.media_details.sizes.thumbnail.source_url,
+    getValue: ({ item }) => item.media_details.sizes.medium.source_url,
     // DataViews: Disable sorting for image columns
     enableSorting: false,
     render: ({ item }) => {
-      return <img src={item.source_url} alt={item.alt_text} />;
+      return (
+        <img
+          height="100%"
+          width="100%"
+          src={item.source_url}
+          alt={item.alt_text}
+        />
+      );
     },
     type: "media",
     description: __(
       "The URL of the image. This is the image that will be displayed in the media library."
     ),
+    readOnly: true
   },
   {
     id: "title.raw",

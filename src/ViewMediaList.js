@@ -66,16 +66,6 @@ const ViewMediaList = () => {
 
   // All filtering, sorting, searching, and pagination handled client-side
   const { data: processedData, paginationInfo } = useMemo(() => {
-    // Make sure we have valid data
-    if (!media || media.length === 0) {
-      return {
-        data: [],
-        paginationInfo: {
-          totalItems: 0,
-          totalPages: 0,
-        },
-      };
-    }
     return filterSortAndPaginate(media, view, fields);
   }, [media, view, fields]);
 
@@ -110,6 +100,7 @@ const ViewMediaList = () => {
   // Handle form changes
   const handleFormChange = (updatedItem) => {
     setSelectedMedia(updatedItem);
+    console.log("updatedItem from ViewMediaList", updatedItem);
     // Here you would typically also update the media in the backend
     // For now, we'll just update the local state
   };

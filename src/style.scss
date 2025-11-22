@@ -3,6 +3,9 @@
 
 #media-manager-root {
 
+    button:has(img) {
+        height: inherit;
+    }
     .dataviews-picker-wrapper {
         height: inherit;
     }
