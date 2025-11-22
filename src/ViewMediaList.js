@@ -10,7 +10,7 @@ import { useMediaData } from "./hooks/useMediaData";
 // Import our shared field definitions and form
 import { fields } from "./fields";
 import { form } from "./form";
-import EditMediaSidebarPanel from "./EditMediaSidebarPanel";
+import SidebarPanel from "./SidebarPanel";
 
 const ViewMediaList = () => {
   const [view, setView] = useState({
@@ -151,7 +151,7 @@ const ViewMediaList = () => {
 
       {/* Sidebar Panel */}
       {isSidebarOpen && (
-        <EditMediaSidebarPanel
+        <SidebarPanel
           onClose={closeSidebar}
           selectedItem={selectedMedia}
           onChange={handleFormChange}

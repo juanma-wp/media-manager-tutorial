@@ -1,12 +1,10 @@
 import { Button, Notice } from "@wordpress/components";
 import { close } from "@wordpress/icons";
 import { __ } from "@wordpress/i18n";
-import { fields } from "./fields";
-import { form } from "./form";
 import { useMediaEditor } from "./hooks/useMediaEditor";
-import MediaEditForm from "./MediaEditForm";
+import EditMediaForm from "./EditMediaForm";
 
-const EditMediaSidebarPanel = ({ onClose, selectedItem, onChange }) => {
+const SidebarPanel = ({ onClose, selectedItem, onChange }) => {
   const {
     displayItem,
     isSaving,
@@ -28,7 +26,7 @@ const EditMediaSidebarPanel = ({ onClose, selectedItem, onChange }) => {
   return (
     <div className="sidebar-panel">
       <div className="sidebar-panel__header">
-        <h2 className="sidebar-panel__title">
+        <h2>
           {selectedItem ? __("Edit Media") : __("Select an item")}
         </h2>
         <Button
@@ -57,7 +55,7 @@ const EditMediaSidebarPanel = ({ onClose, selectedItem, onChange }) => {
 
             {/* Render form component only when displayItem exists */}
             {displayItem && (
-              <MediaEditForm
+              <EditMediaForm
                 displayItem={displayItem}
                 onChange={handleChange}
                 saveChanges={saveChanges}
@@ -73,4 +71,4 @@ const EditMediaSidebarPanel = ({ onClose, selectedItem, onChange }) => {
   );
 };
 
-export default EditMediaSidebarPanel;
+export default SidebarPanel;

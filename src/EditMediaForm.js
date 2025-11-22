@@ -9,7 +9,7 @@ import { form } from "./form";
  * Handles the edit form with validation for media items
  * This is a separate component to ensure hooks are called conditionally
  */
-const MediaEditForm = ({
+const EditMediaForm = ({
   displayItem,
   onChange,
   saveChanges,
@@ -48,4 +48,4 @@ const MediaEditForm = ({
   );
 };
 
-export default MediaEditForm;
+export default EditMediaForm;
