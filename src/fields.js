@@ -12,9 +12,6 @@ export const fields = [
     type: "integer",
     enableSorting: true,
     enableGlobalSearch: true,
-    filterBy: {
-      operators: ["is", "isNot"],
-    },
   },
   {
     // Common property: Unique identifier
@@ -40,7 +37,7 @@ export const fields = [
     description: __(
       "The URL of the image. This is the image that will be displayed in the media library."
     ),
-    readOnly: true
+    readOnly: true,
   },
   {
     id: "title.raw",
@@ -55,6 +52,11 @@ export const fields = [
     filterBy: {
       operators: ["contains", "notContains", "is", "isNot"],
     },
+    isValid: {
+      required: true,
+      elements: true,
+      custom: validateTitle,
+    },
   },
   {
     id: "alt_text",
@@ -64,7 +66,7 @@ export const fields = [
     // DataViews: Enable search
     enableGlobalSearch: true,
     filterBy: {
-      operators: ["contains", "notContains", "is", "isNot"],
+      operators: ["contains", "notContains"],
     },
 
     description: __(
@@ -103,16 +105,17 @@ export const fields = [
 
     // DataViews: Enable sorting
     enableSorting: true,
-    filterBy: {
-      operators: ["is", "isNot", "isBefore", "isAfter"],
-    },
   },
   {
     id: "filesize",
     label: __("File Size"),
     type: "integer",
     readOnly: true,
-    getValue: ({ item }) => item.media_details?.filesize || 0,
+    getValue: ({ item }) => {
+      const size = formatFileSize(item.media_details?.filesize || 0);
+      const sizeNumber = size.split(" ")[0];
+      return sizeNumber;
+    },
 
     // DataViews: Human-readable file size
     render: ({ item }) => {
@@ -120,9 +123,6 @@ export const fields = [
       return formatFileSize(size);
     },
     enableSorting: true,
-    filterBy: {
-      operators: ["is", "isNot", "isGreaterThan", "isLessThan"],
-    },
   },
   {
     id: "mime_type",
@@ -158,9 +158,6 @@ export const fields = [
     },
     readOnly: true,
     enableSorting: true,
-    filterBy: {
-      operators: ["is", "isNot", "isGreaterThan", "isLessThan"],
-    },
   },
   {
     id: "height",
@@ -173,14 +170,11 @@ export const fields = [
     },
     readOnly: true,
     enableSorting: true,
-    filterBy: {
-      operators: ["is", "isNot", "isGreaterThan", "isLessThan"],
-    },
   },
 ];
 
 // Helper function
-export function formatFileSize(bytes) {
+function formatFileSize(bytes) {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;
   const sizes = ["Bytes", "KB", "MB", "GB"];
@@ -188,18 +182,9 @@ export function formatFileSize(bytes) {
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
 }
 
-// Custom validation rules for media fields
-export const validateAltText = (value) => {
-  if (!value || value.trim() === '') {
-    return __('Alt text is required for accessibility');
-  }
-  if (value.length > 125) {
-    return __('Alt text should be less than 125 characters for optimal accessibility');
-  }
-  return true;
-};
-
-export const validateTitle = (value) => {
+function validateTitle(value) {
+  console.log("validateTitle");
+  console.log("value", value);
   if (!value || value.trim() === '') {
     return __('Title is required');
   }
@@ -213,13 +198,6 @@ export const validateTitle = (value) => {
   const specialCharsRegex = /[<>]/;
   if (specialCharsRegex.test(value)) {
     return __('Title cannot contain < or > characters');
-  }
-  return true;
-};
-
-export const validateCaption = (value) => {
-  if (value && value.length > 200) {
-    return __('Caption should be less than 200 characters');
   }
   return true;
 };

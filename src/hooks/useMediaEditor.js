@@ -19,13 +19,7 @@ export const useMediaEditor = (selectedItem) => {
     if (!selectedItem) return;
 
     // Track only the changes
-    const updatedChanges = {};
-    Object.keys(newData).forEach(key => {
-      if (newData[key] !== selectedItem[key]) {
-        updatedChanges[key] = newData[key];
-      }
-    });
-    setChanges(updatedChanges);
+    setChanges({...selectedItem, ...newData});
   };
 
   const saveChanges = async () => {

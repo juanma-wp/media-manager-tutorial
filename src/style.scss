@@ -6,6 +6,10 @@
     button:has(img) {
         height: inherit;
     }
+
+    button:empty {
+        border: 1px solid #ddd;
+    }
     .dataviews-picker-wrapper {
         height: inherit;
     }

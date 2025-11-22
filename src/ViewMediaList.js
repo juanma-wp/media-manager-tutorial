@@ -10,7 +10,7 @@ import { useMediaData } from "./hooks/useMediaData";
 // Import our shared field definitions and form
 import { fields } from "./fields";
 import { form } from "./form";
-import SidebarPanel from "./SidebarPanel";
+import EditMediaSidebarPanel from "./EditMediaSidebarPanel";
 
 const ViewMediaList = () => {
   const [view, setView] = useState({
@@ -151,7 +151,7 @@ const ViewMediaList = () => {
 
       {/* Sidebar Panel */}
       {isSidebarOpen && (
-        <SidebarPanel
+        <EditMediaSidebarPanel
           isOpen={isSidebarOpen}
           onClose={closeSidebar}
           title={
@@ -169,19 +169,10 @@ const ViewMediaList = () => {
               {__("Select a Media Item to edit")}
             </p>
           )}
-        </SidebarPanel>
+        </EditMediaSidebarPanel>
       )}
     </div>
   );
 };
-
-// Helper function
-function formatFileSize(bytes) {
-  if (bytes === 0) return "0 Bytes";
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
-}
 
 export default ViewMediaList;

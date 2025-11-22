@@ -4538,6 +4538,8 @@ body.lockscroll {
   }
 }#media-manager-root button:has(img) {
   height: inherit;
+}#media-manager-root button:empty {
+  border: 1px solid #ddd;
 }#media-manager-root .dataviews-picker-wrapper {
   height: inherit;
 }#media-manager-root .dataforms-layouts-row__field {

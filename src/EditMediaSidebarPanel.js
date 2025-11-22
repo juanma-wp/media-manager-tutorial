@@ -6,7 +6,7 @@ import { fields } from "./fields";
 import { form } from "./form";
 import { useMediaEditor } from "./hooks/useMediaEditor";
 
-const SidebarPanel = ({ isOpen, onClose, selectedItem, onChange }) => {
+const EditMediaSidebarPanel = ({ isOpen, onClose, selectedItem, onChange }) => {
   const {
     displayItem,
     isSaving,
@@ -90,4 +90,4 @@ const SidebarPanel = ({ isOpen, onClose, selectedItem, onChange }) => {
   );
 };
 
-export default SidebarPanel;
+export default EditMediaSidebarPanel;
