@@ -1,4 +1,4 @@
-import { useState, useMemo } from "@wordpress/element";
+import { useState, useMemo, useEffect } from "@wordpress/element";
 import { DataViewsPicker, filterSortAndPaginate } from "@wordpress/dataviews/wp";
 import { __ } from "@wordpress/i18n";
 import { Button } from "@wordpress/components";
@@ -9,15 +9,12 @@ import { useMediaData } from "./hooks/useMediaData";
 
 // Import our shared field definitions and form
 import { fields } from "./fields";
-import { form } from "./form";
 import SidebarPanel from "./SidebarPanel";
 
 const ViewMediaList = () => {
   const [view, setView] = useState({
     fields: [],
     filters: [],
-    groupByField: undefined,
-    infiniteScrollEnabled: undefined,
     mediaField: "thumbnail",
     page: 1,
     perPage: 10,
@@ -38,10 +35,20 @@ const ViewMediaList = () => {
   const [selectedMedia, setSelectedMedia] = useState(null);
 
   // Use our custom hook to fetch media data
-  const { media, isLoading, hasResolved } = useMediaData({
+  const { media, isLoading } = useMediaData({
     perPage: -1, // Get all items
     embed: true,
   });
+
+  // Update selected media when the media list refreshes after save
+  useEffect(() => {
+    if (selectedMedia && media.length > 0) {
+      const freshItem = media.find(item => item.id === selectedMedia.id);
+      if (freshItem) {
+        setSelectedMedia(freshItem);
+      }
+    }
+  }, [media]); // Only depend on media, not selectedMedia
 
   // All filtering, sorting, searching, and pagination handled client-side
   const { data: processedData, paginationInfo } = useMemo(() => {
@@ -76,23 +83,8 @@ const ViewMediaList = () => {
     return false;
   };
 
-  // Handle form changes
-  const handleFormChange = (updatedItem) => {
-    setSelectedMedia(updatedItem);
-    console.log("updatedItem from ViewMediaList", updatedItem);
-    // Here you would typically also update the media in the backend
-    // For now, we'll just update the local state
-  };
+  // Removed handleFormChange - no longer needed
 
-  // console.log("processedData", processedData);
-  // console.log("paginationInfo", paginationInfo);
-  // console.log("selection", selection);
-  // console.log("view", view);
-  // console.log("media", media);
-  // console.log("hasResolved", hasResolved);
-  // console.log("isLoading", isLoading);
-  // console.log("isSidebarOpen", isSidebarOpen);
-  //console.log("selectedMedia", selectedMedia);
 
   return (
     <div className="media-manager-layout">
@@ -154,7 +146,6 @@ const ViewMediaList = () => {
         <SidebarPanel
           onClose={closeSidebar}
           selectedItem={selectedMedia}
-          onChange={handleFormChange}
         />
       )}
     </div>

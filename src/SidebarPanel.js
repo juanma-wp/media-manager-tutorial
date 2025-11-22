@@ -4,7 +4,7 @@ import { __ } from "@wordpress/i18n";
 import { useMediaEditor } from "./hooks/useMediaEditor";
 import EditMediaForm from "./EditMediaForm";
 
-const SidebarPanel = ({ onClose, selectedItem, onChange }) => {
+const SidebarPanel = ({ onClose, selectedItem }) => {
   const {
     displayItem,
     isSaving,
@@ -15,14 +15,8 @@ const SidebarPanel = ({ onClose, selectedItem, onChange }) => {
     saveChanges,
   } = useMediaEditor(selectedItem);
 
-  // Wrapper to call both the hook's handler and the parent's onChange
-  const handleChange = (newData) => {
-    handleEditorChange(newData);
-    if (onChange) {
-      const updatedItem = { ...selectedItem, ...newData };
-      onChange(updatedItem);
-    }
-  };
+  // Direct pass-through to the hook's handler
+  const handleChange = handleEditorChange;
 
   return (
     <div className="sidebar-panel">

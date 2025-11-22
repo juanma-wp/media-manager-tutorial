@@ -1,4 +1,4 @@
-import { useState } from "@wordpress/element";
+import { useState, useEffect } from "@wordpress/element";
 import { useDispatch } from "@wordpress/data";
 import { store as coreDataStore } from "@wordpress/core-data";
 
@@ -12,14 +12,28 @@ export const useMediaEditor = (selectedItem) => {
 
   const { editEntityRecord, saveEditedEntityRecord } = useDispatch(coreDataStore);
 
+  // Reset changes when selected item changes
+  useEffect(() => {
+    setChanges({});
+    setMessage(null);
+  }, [selectedItem?.id]);
+
   // Combine original item with changes for display
   const displayItem = selectedItem ? { ...selectedItem, ...changes } : null;
 
   const handleChange = (newData) => {
     if (!selectedItem) return;
 
-    // Track only the changes
-    setChanges({...selectedItem, ...newData});
+    // newData is the complete updated object from DataForm
+    // Extract only the changes by comparing with original
+    const changedFields = {};
+    Object.keys(newData).forEach(key => {
+      if (newData[key] !== selectedItem[key]) {
+        changedFields[key] = newData[key];
+      }
+    });
+
+    setChanges(changedFields);
   };
 
   const saveChanges = async () => {
