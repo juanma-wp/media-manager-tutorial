@@ -9,6 +9,7 @@ const SidebarPanel = ({ onClose, selectedItem, onChange }) => {
     displayItem,
     isSaving,
     message,
+    clearMessage,
     hasLocalChanges,
     handleChange: handleEditorChange,
     saveChanges,
@@ -46,7 +47,8 @@ const SidebarPanel = ({ onClose, selectedItem, onChange }) => {
             {message && (
               <Notice
                 status={message.type}
-                isDismissible={false}
+                isDismissible={true}
+                onDismiss={clearMessage}
                 className="sidebar-panel__notice"
               >
                 {message.text}

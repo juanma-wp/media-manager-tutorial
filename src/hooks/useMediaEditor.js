@@ -48,10 +48,15 @@ export const useMediaEditor = (selectedItem) => {
     }
   };
 
+  const clearMessage = () => {
+    setMessage(null);
+  };
+
   return {
     displayItem,
     isSaving,
     message,
+    clearMessage,
     hasLocalChanges: Object.keys(changes).length > 0,
     handleChange,
     saveChanges,
