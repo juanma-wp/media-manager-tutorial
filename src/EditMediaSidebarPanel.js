@@ -1,13 +1,12 @@
-import { DataForm, useFormValidity } from "@wordpress/dataviews/wp";
-import { useEffect } from "@wordpress/element";
-import { Button, Notice, __experimentalVStack as VStack } from "@wordpress/components";
+import { Button, Notice } from "@wordpress/components";
 import { close } from "@wordpress/icons";
 import { __ } from "@wordpress/i18n";
 import { fields } from "./fields";
 import { form } from "./form";
 import { useMediaEditor } from "./hooks/useMediaEditor";
+import MediaEditForm from "./MediaEditForm";
 
-const EditMediaSidebarPanel = ({ isOpen, onClose, selectedItem, onChange }) => {
+const EditMediaSidebarPanel = ({ isOpen, onClose, selectedItem , onChange }) => {
   const {
     displayItem,
     isSaving,
@@ -16,9 +15,6 @@ const EditMediaSidebarPanel = ({ isOpen, onClose, selectedItem, onChange }) => {
     handleChange: handleEditorChange,
     saveChanges,
   } = useMediaEditor(selectedItem);
-
-  // Use form validation from DataViews package
-  const { validity, isValid } = useFormValidity(displayItem, fields, form);
 
   // Wrapper to call both the hook's handler and the parent's onChange
   const handleChange = (newData) => {
@@ -51,7 +47,6 @@ const EditMediaSidebarPanel = ({ isOpen, onClose, selectedItem, onChange }) => {
           <p>{__("Select a media item from the grid to edit its details.")}</p>
         ) : (
           <>
-
             {/* Messages */}
             {message && (
               <Notice
@@ -63,34 +58,19 @@ const EditMediaSidebarPanel = ({ isOpen, onClose, selectedItem, onChange }) => {
               </Notice>
             )}
 
-            {/* Edit Form */}
-            <DataForm
-              data={displayItem}
-              fields={fields}
-              form={form}
-              validity={validity}
-              onChange={handleChange}
-            />
-
-            {/* Validation errors are logged to the console; no inline UI list */}
-
-            {/* Save Button */}
-            <div className="sidebar-panel__actions" style={{ display: "flex", gap: "10px" }}>
-              <Button
-                variant="secondary"
-                onClick={onClose}
-              >
-                {__("Cancel")}
-              </Button>
-              <Button
-                variant="primary"
-                onClick={saveChanges}
-                isBusy={isSaving}
-                disabled={!hasLocalChanges || isSaving || !isValid}
-              >
-                {isSaving ? __("Saving...") : __("Save Changes")}
-              </Button>
-            </div>
+            {/* Render form component only when displayItem exists */}
+            {displayItem && (
+              <MediaEditForm
+                displayItem={displayItem}
+                fields={fields}
+                form={form}
+                onChange={handleChange}
+                saveChanges={saveChanges}
+                isSaving={isSaving}
+                hasLocalChanges={hasLocalChanges}
+                onClose={onClose}
+              />
+            )}
           </>
         )}
       </div>

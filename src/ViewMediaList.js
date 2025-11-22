@@ -92,7 +92,7 @@ const ViewMediaList = () => {
   // console.log("hasResolved", hasResolved);
   // console.log("isLoading", isLoading);
   // console.log("isSidebarOpen", isSidebarOpen);
-  console.log("selectedMedia", selectedMedia);
+  //console.log("selectedMedia", selectedMedia);
 
   return (
     <div className="media-manager-layout">

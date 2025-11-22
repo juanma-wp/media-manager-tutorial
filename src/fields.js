@@ -20,7 +20,10 @@ export const fields = [
     // Common property: Display label
     label: __("Thumbnail"),
 
-    getValue: ({ item }) => item.media_details.sizes.medium.source_url,
+    getValue: ({ item }) => {
+      if (!item) return '';
+      return item?.media_details?.sizes?.medium?.source_url || '';
+    },
     // DataViews: Disable sorting for image columns
     enableSorting: false,
     render: ({ item }) => {
