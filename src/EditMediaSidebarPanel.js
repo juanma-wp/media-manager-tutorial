@@ -1,5 +1,6 @@
-import { DataForm } from "@wordpress/dataviews/wp";
-import { Button, Notice } from "@wordpress/components";
+import { DataForm, useFormValidity } from "@wordpress/dataviews/wp";
+import { useEffect } from "@wordpress/element";
+import { Button, Notice, __experimentalVStack as VStack } from "@wordpress/components";
 import { close } from "@wordpress/icons";
 import { __ } from "@wordpress/i18n";
 import { fields } from "./fields";
@@ -16,6 +17,9 @@ const EditMediaSidebarPanel = ({ isOpen, onClose, selectedItem, onChange }) => {
     saveChanges,
   } = useMediaEditor(selectedItem);
 
+  // Use form validation from DataViews package
+  const { validity, isValid } = useFormValidity(displayItem, fields, form);
+
   // Wrapper to call both the hook's handler and the parent's onChange
   const handleChange = (newData) => {
     handleEditorChange(newData);
@@ -25,6 +29,7 @@ const EditMediaSidebarPanel = ({ isOpen, onClose, selectedItem, onChange }) => {
     }
   };
 
+  
   if (!isOpen) return null;
 
   return (
@@ -63,8 +68,11 @@ const EditMediaSidebarPanel = ({ isOpen, onClose, selectedItem, onChange }) => {
               data={displayItem}
               fields={fields}
               form={form}
+              validity={validity}
               onChange={handleChange}
             />
+
+            {/* Validation errors are logged to the console; no inline UI list */}
 
             {/* Save Button */}
             <div className="sidebar-panel__actions" style={{ display: "flex", gap: "10px" }}>
@@ -78,7 +86,7 @@ const EditMediaSidebarPanel = ({ isOpen, onClose, selectedItem, onChange }) => {
                 variant="primary"
                 onClick={saveChanges}
                 isBusy={isSaving}
-                disabled={!hasLocalChanges || isSaving}
+                disabled={!hasLocalChanges || isSaving || !isValid}
               >
                 {isSaving ? __("Saving...") : __("Save Changes")}
               </Button>

@@ -112,9 +112,8 @@ export const fields = [
     type: "integer",
     readOnly: true,
     getValue: ({ item }) => {
-      const size = formatFileSize(item.media_details?.filesize || 0);
-      const sizeNumber = size.split(" ")[0];
-      return sizeNumber;
+      const [size] = formatFileSize(item.media_details?.filesize || 0);
+      return size;
     },
 
     // DataViews: Human-readable file size
@@ -179,17 +178,15 @@ function formatFileSize(bytes) {
   const k = 1024;
   const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
+  return [parseInt(Math.round((bytes / Math.pow(k, i)) * 100) / 100, 10), sizes[i]];
 }
 
-function validateTitle(value) {
-  console.log("validateTitle");
-  console.log("value", value);
+function validateTitle({title: { raw: value }}) {
   if (!value || value.trim() === '') {
     return __('Title is required');
   }
-  if (value.length < 3) {
-    return __('Title must be at least 3 characters long');
+  if (value.length < 5) {
+    return __('Title must be at least 5 characters long');
   }
   if (value.length > 100) {
     return __('Title must be less than 100 characters');
