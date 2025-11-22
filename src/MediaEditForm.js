@@ -1,6 +1,8 @@
 import { DataForm, useFormValidity } from "@wordpress/dataviews/wp";
 import { Button } from "@wordpress/components";
 import { __ } from "@wordpress/i18n";
+import { fields } from "./fields";
+import { form } from "./form";
 
 /**
  * MediaEditForm component
@@ -9,8 +11,6 @@ import { __ } from "@wordpress/i18n";
  */
 const MediaEditForm = ({
   displayItem,
-  fields,
-  form,
   onChange,
   saveChanges,
   isSaving,

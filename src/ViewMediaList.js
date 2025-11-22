@@ -152,24 +152,10 @@ const ViewMediaList = () => {
       {/* Sidebar Panel */}
       {isSidebarOpen && (
         <EditMediaSidebarPanel
-          isOpen={isSidebarOpen}
           onClose={closeSidebar}
-          title={
-            selectedMedia
-              ? `Edit Media Item with ID: ${selectedMedia.id}`
-              : __("Select a Media Item to edit")
-          }
           selectedItem={selectedMedia}
-          fields={fields}
-          form={form}
           onChange={handleFormChange}
-        >
-          {!selectedMedia && (
-            <p style={{ padding: "20px", color: "#666" }}>
-              {__("Select a Media Item to edit")}
-            </p>
-          )}
-        </EditMediaSidebarPanel>
+        />
       )}
     </div>
   );

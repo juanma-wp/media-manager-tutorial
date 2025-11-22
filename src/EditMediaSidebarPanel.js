@@ -6,7 +6,7 @@ import { form } from "./form";
 import { useMediaEditor } from "./hooks/useMediaEditor";
 import MediaEditForm from "./MediaEditForm";
 
-const EditMediaSidebarPanel = ({ isOpen, onClose, selectedItem , onChange }) => {
+const EditMediaSidebarPanel = ({ onClose, selectedItem, onChange }) => {
   const {
     displayItem,
     isSaving,
@@ -24,9 +24,6 @@ const EditMediaSidebarPanel = ({ isOpen, onClose, selectedItem , onChange }) => 
       onChange(updatedItem);
     }
   };
-
-  
-  if (!isOpen) return null;
 
   return (
     <div className="sidebar-panel">
@@ -62,8 +59,6 @@ const EditMediaSidebarPanel = ({ isOpen, onClose, selectedItem , onChange }) => 
             {displayItem && (
               <MediaEditForm
                 displayItem={displayItem}
-                fields={fields}
-                form={form}
                 onChange={handleChange}
                 saveChanges={saveChanges}
                 isSaving={isSaving}
