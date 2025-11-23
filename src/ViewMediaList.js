@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "@wordpress/element";
+import { useState, useMemo } from "@wordpress/element";
 import { DataViewsPicker, filterSortAndPaginate } from "@wordpress/dataviews/wp";
 import { __ } from "@wordpress/i18n";
 import { Button } from "@wordpress/components";
@@ -32,7 +32,7 @@ const ViewMediaList = () => {
 
   // State for sidebar panel
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [selectedMedia, setSelectedMedia] = useState(null);
+  const [selectedMediaId, setSelectedMediaId] = useState(null);
 
   // Use our custom hook to fetch media data
   const { media, isLoading } = useMediaData({
@@ -40,15 +40,11 @@ const ViewMediaList = () => {
     embed: true,
   });
 
-  // Update selected media when the media list refreshes after save
-  useEffect(() => {
-    if (selectedMedia && media.length > 0) {
-      const freshItem = media.find(item => item.id === selectedMedia.id);
-      if (freshItem) {
-        setSelectedMedia(freshItem);
-      }
-    }
-  }, [media]); // Only depend on media, not selectedMedia
+  // Derive selected media from the fresh media array
+  const selectedMedia = useMemo(() => {
+    if (!selectedMediaId) return null;
+    return media.find(item => item.id === selectedMediaId);
+  }, [media, selectedMediaId]);
 
   // All filtering, sorting, searching, and pagination handled client-side
   const { data: processedData, paginationInfo } = useMemo(() => {
@@ -69,15 +65,10 @@ const ViewMediaList = () => {
     setSelection(selectedIds);
 
     if (selectedIds && selectedIds.length > 0) {
-      // Find the selected item from the media array
-      const selectedItem = media.find(
-        (item) => item.id === parseInt(selectedIds[0])
-      );
-      if (selectedItem) {
-        setSelectedMedia(selectedItem);
-      }
+      // Just store the ID, the selected item will be derived from fresh media
+      setSelectedMediaId(parseInt(selectedIds[0]));
     } else {
-      setSelectedMedia(null);
+      setSelectedMediaId(null);
     }
 
     return false;
