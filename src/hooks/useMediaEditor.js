@@ -6,33 +6,44 @@ import { store as coreDataStore } from "@wordpress/core-data";
  * Simple hook for handling media editing operations
  */
 export const useMediaEditor = (selectedItem) => {
-  const [modifiedItem, setModifiedItem] = useState(null);
+  const [changes, setChanges] = useState({});
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState(null);
 
   const { editEntityRecord, saveEditedEntityRecord } = useDispatch(coreDataStore);
 
-  // Reset modified item when selected item changes
+  // Reset changes when selected item changes
   useEffect(() => {
-    setModifiedItem(null);
+    setChanges({});
     setMessage(null);
   }, [selectedItem?.id]);
 
-  // Use modified item or original
-  const displayItem = modifiedItem || selectedItem;
+  // Combine original item with changes for display
+  const displayItem = selectedItem ? { ...selectedItem, ...changes } : null;
 
   const handleChange = (newData) => {
-    setModifiedItem(newData);
+    if (!selectedItem) return;
+
+    // newData is the complete updated object from DataForm
+    // Extract only the changes by comparing with original
+    const changedFields = {};
+    Object.keys(newData).forEach((key) => {
+      if (newData[key] !== selectedItem[key]) {
+        changedFields[key] = newData[key];
+      }
+    });
+
+    setChanges(changedFields);
   };
 
   const saveChanges = async () => {
-    if (!selectedItem || !modifiedItem) return;
+    if (!selectedItem || Object.keys(changes).length === 0) return;
 
     setIsSaving(true);
     setMessage(null);
 
     try {
-      editEntityRecord("postType", "attachment", selectedItem.id, modifiedItem);
+      editEntityRecord("postType", "attachment", selectedItem.id, changes);
 
       const updatedRecord = await saveEditedEntityRecord(
         "postType",
@@ -42,7 +53,7 @@ export const useMediaEditor = (selectedItem) => {
 
       if (updatedRecord) {
         setMessage({ type: 'success', text: "Changes saved successfully!" });
-        setModifiedItem(null);
+        setChanges({});
       }
     } catch (error) {
       setMessage({ type: 'error', text: "Failed to save changes" });
@@ -55,15 +66,12 @@ export const useMediaEditor = (selectedItem) => {
     setMessage(null);
   };
 
-  // Has changes if there's a modified item
-  const hasLocalChanges = !!modifiedItem;
-
   return {
     displayItem,
     isSaving,
     message,
     clearMessage,
-    hasLocalChanges,
+    hasLocalChanges: Object.keys(changes).length > 0,
     handleChange,
     saveChanges,
   };
