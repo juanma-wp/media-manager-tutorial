@@ -1,77 +1,69 @@
 import { useState, useEffect } from "@wordpress/element";
 import { useDispatch } from "@wordpress/data";
-import { store as coreDataStore } from "@wordpress/core-data";
 
 /**
- * Simple hook for handling media editing operations
+ * Hook for editing media attachments
+ * Tracks local changes and saves them to WordPress
  */
 export const useMediaEditor = (selectedItem) => {
-  const [changes, setChanges] = useState({});
-  const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState(null);
+  // Single state object with all editor state
+  const [state, setState] = useState({
+    changes: {},      // Unsaved changes
+    isSaving: false,  // Loading state
+    message: null     // Success/error messages
+  });
 
-  const { editEntityRecord, saveEditedEntityRecord } = useDispatch(coreDataStore);
+  const { editEntityRecord, saveEditedEntityRecord } = useDispatch("core");
 
-  // Reset changes when selected item changes
+  // Clear everything when switching items
   useEffect(() => {
-    setChanges({});
-    setMessage(null);
+    setState({ changes: {}, isSaving: false, message: null });
   }, [selectedItem?.id]);
 
-  // Combine original item with changes for display
-  const displayItem = selectedItem ? { ...selectedItem, ...changes } : null;
-
+  // Track what changed compared to original
   const handleChange = (newData) => {
     if (!selectedItem) return;
 
-    // newData is the complete updated object from DataForm
-    // Extract only the changes by comparing with original
+    // Only keep fields that actually changed
     const changedFields = {};
-    Object.keys(newData).forEach((key) => {
-      if (newData[key] !== selectedItem[key]) {
-        changedFields[key] = newData[key];
+    for (const [key, value] of Object.entries(newData)) {
+      if (value !== selectedItem[key]) {
+        changedFields[key] = value;
       }
-    });
-
-    setChanges(changedFields);
+    }
+    setState(prev => ({ ...prev, changes: changedFields }));
   };
 
+  // Save changes to WordPress
   const saveChanges = async () => {
-    if (!selectedItem || Object.keys(changes).length === 0) return;
+    if (!selectedItem || Object.keys(state.changes).length === 0) return;
 
-    setIsSaving(true);
-    setMessage(null);
+    setState(prev => ({ ...prev, isSaving: true, message: null }));
 
     try {
-      editEntityRecord("postType", "attachment", selectedItem.id, changes);
+      // Tell WordPress about the changes
+      editEntityRecord("postType", "attachment", selectedItem.id, state.changes);
 
-      const updatedRecord = await saveEditedEntityRecord(
-        "postType",
-        "attachment",
-        selectedItem.id
-      );
+      // Actually save them
+      const saved = await saveEditedEntityRecord("postType", "attachment", selectedItem.id);
 
-      if (updatedRecord) {
-        setMessage({ type: 'success', text: "Changes saved successfully!" });
-        setChanges({});
+      if (saved) {
+        setState({ changes: {}, isSaving: false, message: { type: 'success', text: "Changes saved!" } });
+      } else {
+        setState(prev => ({ ...prev, isSaving: false, message: { type: 'error', text: "Failed to save" } }));
       }
-    } catch (error) {
-      setMessage({ type: 'error', text: "Failed to save changes" });
-    } finally {
-      setIsSaving(false);
+    } catch {
+      setState(prev => ({ ...prev, isSaving: false, message: { type: 'error', text: "Failed to save" } }));
     }
   };
 
-  const clearMessage = () => {
-    setMessage(null);
-  };
-
   return {
-    displayItem,
-    isSaving,
-    message,
-    clearMessage,
-    hasLocalChanges: Object.keys(changes).length > 0,
+    // Merge original item with unsaved changes for display
+    displayItem: selectedItem ? { ...selectedItem, ...state.changes } : null,
+    isSaving: state.isSaving,
+    message: state.message,
+    clearMessage: () => setState(prev => ({ ...prev, message: null })),
+    hasLocalChanges: Object.keys(state.changes).length > 0,
     handleChange,
     saveChanges,
   };
