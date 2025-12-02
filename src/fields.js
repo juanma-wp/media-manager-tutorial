@@ -24,8 +24,6 @@ export const fields = [
       if (!item) return '';
       return item?.media_details?.sizes?.medium?.source_url || '';
     },
-    // DataViews: Disable sorting for image columns
-    enableSorting: false,
     render: ({ item }) => {
       return (
         <img
@@ -36,6 +34,7 @@ export const fields = [
         />
       );
     },
+    readOnly: true,
     type: "media",
     description: __(
       "The URL of the image. This is the image that will be displayed in the media library."
