@@ -11,9 +11,12 @@ import { useMediaData } from "./hooks/useMediaData";
 import { fields } from "./fields";
 import SidebarPanel from "./SidebarPanel";
 
+import { useUsersData } from "./hooks/useUsersData";
+
 const ViewMediaList = () => {
+  
   const [view, setView] = useState({
-    fields: [],
+    fields: ["author"],
     filters: [],
     mediaField: "thumbnail",
     page: 1,
@@ -23,7 +26,7 @@ const ViewMediaList = () => {
     descriptionField: "description.raw",
     type: "pickerGrid",
     layout: {
-      previewSize: 120
+      previewSize: 120,
     },
   });
 
@@ -32,7 +35,7 @@ const ViewMediaList = () => {
 
   // State for sidebar panel
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [selectedMediaId, setSelectedMediaId] = useState(null);
+  const [selectedMediaIds, setSelectedMediaIds] = useState([]);
 
   // Use our custom hook to fetch media data
   const { media, isLoading } = useMediaData({
@@ -42,9 +45,14 @@ const ViewMediaList = () => {
 
   // Derive selected media from the fresh media array
   const selectedMedia = useMemo(() => {
-    if (!selectedMediaId) return null;
-    return media.find(item => item.id === selectedMediaId);
-  }, [media, selectedMediaId]);
+    if (!selectedMediaIds || selectedMediaIds.length === 0) return null;
+    // For single selection, return the item
+    if (selectedMediaIds.length === 1) {
+      return media.find((item) => item.id === selectedMediaIds[0]);
+    }
+    // For multiple selection, return array of items
+    return media.filter((item) => selectedMediaIds.includes(item.id));
+  }, [media, selectedMediaIds]);
 
   // All filtering, sorting, searching, and pagination handled client-side
   const { data: processedData, paginationInfo } = useMemo(() => {
@@ -65,17 +73,30 @@ const ViewMediaList = () => {
     setSelection(selectedIds);
 
     if (selectedIds && selectedIds.length > 0) {
-      // Just store the ID, the selected item will be derived from fresh media
-      setSelectedMediaId(parseInt(selectedIds[0]));
+      // Store all selected IDs for bulk editing support
+      setSelectedMediaIds(selectedIds.map((id) => parseInt(id)));
     } else {
-      setSelectedMediaId(null);
+      setSelectedMediaIds([]);
     }
 
     return false;
   };
 
-  // Removed handleFormChange - no longer needed
-
+  
+  const { usersElements } = useUsersData();
+  const filteredFields = useMemo(() => {
+    
+    // Add users to author field elements
+    return fields.map((field) => {
+      if (field.id === "author") {
+        return {
+          ...field,
+          elements: usersElements
+        };
+      }
+      return field;
+    });
+  }, [usersElements]);
 
   return (
     <div className="media-manager-layout">
@@ -95,14 +116,20 @@ const ViewMediaList = () => {
                 {__(`${media.length} items`)}
               </span>
             )}
+            {selectedMediaIds.length > 0 && (
+              <span style={{ color: "#333", fontWeight: "bold" }}>
+                {__(`${selectedMediaIds.length} selected`)}
+              </span>
+            )}
             <Button
               icon={pencil}
               onClick={toggleSidebar}
               variant="primary"
               label={isSidebarOpen ? __("Close sidebar") : __("Open sidebar")}
               isPressed={isSidebarOpen}
+              disabled={selectedMediaIds.length === 0}
             >
-              Edit
+              {selectedMediaIds.length > 1 ? __("Bulk Edit") : __("Edit")}
             </Button>
           </div>
         </div>
@@ -110,17 +137,18 @@ const ViewMediaList = () => {
         <DataViewsPicker
           actions={[
             {
-              supportsBulk: false,
+              supportsBulk: true,
             },
           ]}
           config={{
             perPageSizes: [10, 25, 50, 100],
+            supportsBulkSelection: true,
           }}
           data={processedData}
           defaultLayouts={{
             pickerGrid: {},
           }}
-          fields={fields}
+          fields={filteredFields}
           getItemId={(item) => item.id.toString()}
           isLoading={isLoading}
           itemListLabel="Media Items"
@@ -136,7 +164,8 @@ const ViewMediaList = () => {
       {isSidebarOpen && (
         <SidebarPanel
           onClose={closeSidebar}
-          selectedItem={selectedMedia}
+          selectedItems={selectedMedia}
+          isBulkEdit={selectedMediaIds.length > 1}
         />
       )}
     </div>

@@ -21,8 +21,8 @@ export const fields = [
     label: __("Thumbnail"),
 
     getValue: ({ item }) => {
-      if (!item) return '';
-      return item?.media_details?.sizes?.medium?.source_url || '';
+      if (!item) return "";
+      return item?.media_details?.sizes?.medium?.source_url || "";
     },
     render: ({ item }) => {
       return (
@@ -107,6 +107,29 @@ export const fields = [
 
     // DataViews: Enable sorting
     enableSorting: true,
+  },
+  {
+    id: "author",
+    label: __("Author"),
+    type: "integer",
+
+    // Elements will be populated dynamically with users
+    elements: [],
+
+    // DataViews: Display author name
+    render: ( { field, item } ) => {
+      return field.elements.find(element => element.value === item.author)?.label || '-';
+    },
+
+    // DataViews: Enable sorting and filtering
+    enableSorting: true,
+    filterBy: {
+      operators: ["is", "isNot"],
+    },
+
+    setValue: ({ value }) => ({
+      author: Number(value),
+    }),
   },
   {
     id: "filesize",

@@ -4,8 +4,9 @@ import { useDispatch } from "@wordpress/data";
 /**
  * Hook for editing media attachments
  * Tracks local changes and saves them to WordPress
+ * Supports bulk editing of multiple items
  */
-export const useMediaEditor = (selectedItem) => {
+export const useMediaEditor = (selectedItems, isBulkEdit = false) => {
   // Single state object with all editor state
   const [state, setState] = useState({
     changes: {},      // Unsaved changes
@@ -15,51 +16,92 @@ export const useMediaEditor = (selectedItem) => {
 
   const { editEntityRecord, saveEditedEntityRecord } = useDispatch("core");
 
+  // Get the first item for single edit, or use selectedItems for bulk
+  const selectedItem = isBulkEdit ? null : selectedItems;
+
   // Clear everything when switching items
   useEffect(() => {
     setState({ changes: {}, isSaving: false, message: null });
-  }, [selectedItem?.id]);
+  }, [selectedItem?.id, isBulkEdit, Array.isArray(selectedItems) ? selectedItems.length : 0]);
 
   // Track what changed compared to original
   const handleChange = (newData) => {
-    if (!selectedItem) return;
+    if (!selectedItem && !isBulkEdit) return;
 
-    // Only keep fields that actually changed
-    const changedFields = {};
-    for (const [key, value] of Object.entries(newData)) {
-      if (value !== selectedItem[key]) {
-        changedFields[key] = value;
+    if (isBulkEdit) {
+      // For bulk edit, track all changes without comparing to original
+      setState(prev => ({ ...prev, changes: newData }));
+    } else {
+      // Only keep fields that actually changed
+      const changedFields = {};
+      for (const [key, value] of Object.entries(newData)) {
+        if (value !== selectedItem[key]) {
+          changedFields[key] = value;
+        }
       }
+      setState(prev => ({ ...prev, changes: changedFields }));
     }
-    setState(prev => ({ ...prev, changes: changedFields }));
   };
 
   // Save changes to WordPress
   const saveChanges = async () => {
-    if (!selectedItem || Object.keys(state.changes).length === 0) return;
+    if ((!selectedItem && !isBulkEdit) || Object.keys(state.changes).length === 0) return;
 
     setState(prev => ({ ...prev, isSaving: true, message: null }));
 
     try {
-      // Tell WordPress about the changes
-      editEntityRecord("postType", "attachment", selectedItem.id, state.changes);
+      if (isBulkEdit && Array.isArray(selectedItems)) {
+        // Bulk save - apply changes to all selected items
+        const savePromises = selectedItems.map(async (item) => {
+          editEntityRecord("postType", "attachment", item.id, state.changes);
+          return saveEditedEntityRecord("postType", "attachment", item.id);
+        });
 
-      // Actually save them
-      const saved = await saveEditedEntityRecord("postType", "attachment", selectedItem.id);
+        const results = await Promise.all(savePromises);
+        const allSaved = results.every(saved => saved);
 
-      if (saved) {
-        setState({ changes: {}, isSaving: false, message: { type: 'success', text: "Changes saved!" } });
+        if (allSaved) {
+          setState({ changes: {}, isSaving: false, message: { type: 'success', text: `${selectedItems.length} items updated successfully!` } });
+        } else {
+          setState(prev => ({ ...prev, isSaving: false, message: { type: 'error', text: "Some items failed to save" } }));
+        }
       } else {
-        setState(prev => ({ ...prev, isSaving: false, message: { type: 'error', text: "Failed to save" } }));
+        // Single save
+        editEntityRecord("postType", "attachment", selectedItem.id, state.changes);
+        const saved = await saveEditedEntityRecord("postType", "attachment", selectedItem.id);
+
+        if (saved) {
+          setState({ changes: {}, isSaving: false, message: { type: 'success', text: "Changes saved!" } });
+        } else {
+          setState(prev => ({ ...prev, isSaving: false, message: { type: 'error', text: "Failed to save" } }));
+        }
       }
     } catch {
       setState(prev => ({ ...prev, isSaving: false, message: { type: 'error', text: "Failed to save" } }));
     }
   };
 
+  // For bulk edit, create a display item with empty/common values
+  const getBulkDisplayItem = () => {
+    if (!isBulkEdit || !Array.isArray(selectedItems)) return null;
+
+    // Start with empty/null values for bulk edit fields
+    const bulkItem = {
+      'author': null,  // Use null for unselected state
+      'date': '',
+      ...state.changes // Apply any changes made
+    };
+
+    return bulkItem;
+  };
+
   return {
     // Merge original item with unsaved changes for display
-    displayItem: selectedItem ? { ...selectedItem, ...state.changes } : null,
+    displayItem: isBulkEdit
+      ? getBulkDisplayItem()
+      : selectedItem
+        ? { ...selectedItem, ...state.changes }
+        : null,
     isSaving: state.isSaving,
     message: state.message,
     clearMessage: () => setState(prev => ({ ...prev, message: null })),

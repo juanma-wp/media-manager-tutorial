@@ -20,6 +20,7 @@ export const form = {
     "alt_text",
     "caption.raw",
     "description.raw",
+    "author",
     "date",
     {
       id: "fileInfo",

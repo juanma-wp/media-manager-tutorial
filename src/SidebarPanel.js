@@ -4,7 +4,7 @@ import { __ } from "@wordpress/i18n";
 import { useMediaEditor } from "./hooks/useMediaEditor";
 import EditMediaForm from "./EditMediaForm";
 
-const SidebarPanel = ({ onClose, selectedItem }) => {
+const SidebarPanel = ({ onClose, selectedItems, isBulkEdit }) => {
   const {
     displayItem,
     isSaving,
@@ -13,7 +13,7 @@ const SidebarPanel = ({ onClose, selectedItem }) => {
     hasLocalChanges,
     handleChange: handleEditorChange,
     saveChanges,
-  } = useMediaEditor(selectedItem);
+  } = useMediaEditor(selectedItems, isBulkEdit);
 
   // Direct pass-through to the hook's handler
   const handleChange = handleEditorChange;
@@ -22,7 +22,11 @@ const SidebarPanel = ({ onClose, selectedItem }) => {
     <div className="sidebar-panel">
       <div className="sidebar-panel__header">
         <h2>
-          {selectedItem ? __("Edit Media") : __("Select an item")}
+          {isBulkEdit
+            ? __(`Bulk Edit (${Array.isArray(selectedItems) ? selectedItems.length : 0} items)`)
+            : selectedItems
+            ? __("Edit Media")
+            : __("Select an item")}
         </h2>
         <Button
           icon={close}
@@ -33,7 +37,7 @@ const SidebarPanel = ({ onClose, selectedItem }) => {
       </div>
 
       <div className="sidebar-panel__content">
-        {!selectedItem ? (
+        {!selectedItems ? (
           <p>{__("Select a media item from the grid to edit its details.")}</p>
         ) : (
           <>
@@ -58,6 +62,8 @@ const SidebarPanel = ({ onClose, selectedItem }) => {
                 isSaving={isSaving}
                 hasLocalChanges={hasLocalChanges}
                 onClose={onClose}
+                isBulkEdit={isBulkEdit}
+                selectedCount={Array.isArray(selectedItems) ? selectedItems.length : 1}
               />
             )}
           </>

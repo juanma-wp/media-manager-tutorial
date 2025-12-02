@@ -1,13 +1,18 @@
 import { DataForm, useFormValidity } from "@wordpress/dataviews/wp";
 import { Button } from "@wordpress/components";
 import { __ } from "@wordpress/i18n";
+import { useMemo } from "@wordpress/element";
 import { fields } from "./fields";
 import { form } from "./form";
+
+// Fields that support bulk editing
+const BULK_EDIT_FIELDS = ['author', 'date'];
 
 /**
  * MediaEditForm component
  * Handles the edit form with validation for media items
  * This is a separate component to ensure hooks are called conditionally
+ * Supports bulk editing with filtered fields
  */
 const EditMediaForm = ({
   displayItem,
@@ -15,17 +20,53 @@ const EditMediaForm = ({
   saveChanges,
   isSaving,
   hasLocalChanges,
-  onClose
+  onClose,
+  isBulkEdit,
+  selectedCount
 }) => {
-  const { validity, isValid } = useFormValidity(displayItem, fields, form);
+
+  // Filter fields for bulk editing and populate author elements
+  const filteredFields = useMemo(() => {
+    return isBulkEdit
+      ? fields.filter(field => BULK_EDIT_FIELDS.includes(field.id))
+      : fields;
+
+  }, [isBulkEdit]);
+
+  console.log({ filteredFields });
+  // Filter form for bulk editing
+  const filteredForm = useMemo(() => {
+    if (!isBulkEdit) return form;
+    return {
+      ...form,
+      type: 'regular',
+      fields: BULK_EDIT_FIELDS.filter(id => form.fields?.includes(id) || !form.fields)
+    };
+  }, [isBulkEdit]);
+
+  const { validity, isValid } = useFormValidity(displayItem, filteredFields, filteredForm);
 
   return (
     <>
+      {/* Bulk edit notice */}
+      {isBulkEdit && (
+        <div style={{
+          padding: "12px",
+          background: "#f0f0f1",
+          borderRadius: "4px",
+          marginBottom: "16px"
+        }}>
+          <p style={{ margin: 0, fontSize: "13px" }}>
+            {__(`Editing ${selectedCount} items. Only common fields are available for bulk editing.`)}
+          </p>
+        </div>
+      )}
+
       {/* Edit Form */}
       <DataForm
         data={displayItem}
-        fields={fields}
-        form={form}
+        fields={filteredFields}
+        form={filteredForm}
         validity={validity}
         onChange={onChange}
       />
@@ -39,9 +80,13 @@ const EditMediaForm = ({
           variant="primary"
           onClick={saveChanges}
           isBusy={isSaving}
-          disabled={!hasLocalChanges || isSaving || !isValid}
+          disabled={!hasLocalChanges || isSaving || (!isBulkEdit && !isValid)}
         >
-          {isSaving ? __("Saving...") : __("Save Changes")}
+          {isSaving
+            ? __("Saving...")
+            : isBulkEdit
+              ? __(`Update ${selectedCount} Items`)
+              : __("Save Changes")}
         </Button>
       </div>
     </>
