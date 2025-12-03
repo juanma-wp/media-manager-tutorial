@@ -103,7 +103,17 @@ export const fields = [
     type: "datetime",
 
     // DataViews: Format date for display
-    render: ({ item }) => dateI18n("M j, Y", item.date),
+    render: ({ item }) => {
+      // Handle placeholder for bulk edit mixed values
+      if (item.date === '-') return '-';
+      return item.date ? dateI18n("M j, Y", item.date) : '';
+    },
+
+    // DataForm: Get value for form display
+    getValue: ({ item }) => {
+      // Return the raw date value (don't return '-' placeholder)
+      return item.date === '-' ? '' : item.date;
+    },
 
     // DataViews: Enable sorting
     enableSorting: true,

@@ -16,7 +16,7 @@ import { useUsersData } from "./hooks/useUsersData";
 const ViewMediaList = () => {
   
   const [view, setView] = useState({
-    fields: ["author"],
+    fields: ["author", "date"],
     filters: [],
     mediaField: "thumbnail",
     page: 1,

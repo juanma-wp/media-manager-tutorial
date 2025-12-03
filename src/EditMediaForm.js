@@ -4,6 +4,7 @@ import { __ } from "@wordpress/i18n";
 import { useMemo } from "@wordpress/element";
 import { fields } from "./fields";
 import { form } from "./form";
+import { useUsersData } from "./hooks/useUsersData";
 
 // Fields that support bulk editing
 const BULK_EDIT_FIELDS = ['author', 'date'];
@@ -24,16 +25,47 @@ const EditMediaForm = ({
   isBulkEdit,
   selectedCount
 }) => {
+  // Fetch users for the author field
+  const { usersElements } = useUsersData();
 
   // Filter fields for bulk editing and populate author elements
   const filteredFields = useMemo(() => {
-    return isBulkEdit
+    const fieldsToUse = isBulkEdit
       ? fields.filter(field => BULK_EDIT_FIELDS.includes(field.id))
       : fields;
 
-  }, [isBulkEdit]);
+    // Add users to author field elements and handle bulk edit placeholders
+    return fieldsToUse.map(field => {
+      if (field.id === 'author') {
+        return {
+          ...field,
+          elements: usersElements,
+          setValue: ({ value }) => ({
+            author: value ? Number(value) : null
+          }),
+          // Add placeholder text for bulk edit
+          ...(isBulkEdit && displayItem?.author === null ? {
+            placeholder: __("— Mixed values —")
+          } : {})
+        };
+      }
+      if (field.id === 'date' && isBulkEdit) {
+        return {
+          ...field,
+          // Show placeholder for mixed values or existing value
+          ...(displayItem?.date === '-' ? {
+            placeholder: __("— Mixed values —"),
+            getValue: ({ item }) => ''  // Return empty string for placeholder
+          } : {}),
+          setValue: ({ value }) => ({
+            date: value || null
+          })
+        };
+      }
+      return field;
+    });
+  }, [isBulkEdit, usersElements, displayItem]);
 
-  console.log({ filteredFields });
   // Filter form for bulk editing
   const filteredForm = useMemo(() => {
     if (!isBulkEdit) return form;
@@ -57,7 +89,7 @@ const EditMediaForm = ({
           marginBottom: "16px"
         }}>
           <p style={{ margin: 0, fontSize: "13px" }}>
-            {__(`Editing ${selectedCount} items. Only common fields are available for bulk editing.`)}
+            {__(`Editing ${selectedCount} items. Fields with the same value are shown; mixed values display "— Mixed values —".`)}
           </p>
         </div>
       )}

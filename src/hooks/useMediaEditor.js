@@ -81,18 +81,55 @@ export const useMediaEditor = (selectedItems, isBulkEdit = false) => {
     }
   };
 
-  // For bulk edit, create a display item with empty/common values
+  // For bulk edit, create a display item with common values or placeholders
   const getBulkDisplayItem = () => {
-    if (!isBulkEdit || !Array.isArray(selectedItems)) return null;
+    if (!isBulkEdit || !Array.isArray(selectedItems) || selectedItems.length === 0) return null;
 
-    // Start with empty/null values for bulk edit fields
-    const bulkItem = {
-      'author': null,  // Use null for unselected state
-      'date': '',
-      ...state.changes // Apply any changes made
-    };
+    // Check which fields have the same value across all selected items
+    const bulkItem = {};
 
-    return bulkItem;
+    // Fields that can be bulk edited
+    const bulkEditableFields = ['author', 'date'];
+
+    bulkEditableFields.forEach(fieldName => {
+      // Check if all items have the same value for this field
+      const firstValue = selectedItems[0][fieldName];
+      let allSame;
+
+      if (fieldName === 'date') {
+        // For dates, compare just the date part (YYYY-MM-DD), ignoring time
+        const getDateOnly = (dateString) => {
+          if (!dateString) return null;
+          return dateString.split('T')[0]; // Get just the date part
+        };
+
+        const firstDateOnly = getDateOnly(firstValue);
+        allSame = selectedItems.every(item => getDateOnly(item[fieldName]) === firstDateOnly);
+
+        // Debug logging for date field
+        console.log('Date comparison:', {
+          firstValue,
+          firstDateOnly,
+          allValues: selectedItems.map(item => item[fieldName]),
+          allDatesOnly: selectedItems.map(item => getDateOnly(item[fieldName])),
+          allSame
+        });
+      } else {
+        allSame = selectedItems.every(item => item[fieldName] === firstValue);
+      }
+
+      if (allSame && firstValue !== undefined && firstValue !== null) {
+        // If all items have the same value, show it
+        bulkItem[fieldName] = firstValue;
+      } else {
+        // If values differ, show a placeholder
+        // For author (numeric field), use null; for date (string field), use '-'
+        bulkItem[fieldName] = fieldName === 'author' ? null : '-';
+      }
+    });
+
+    // Apply any changes made during editing
+    return { ...bulkItem, ...state.changes };
   };
 
   return {
